@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Activity, Shield, ArrowRight } from 'lucide-react';
+import { Brain, Activity, Shield, ArrowRight, HelpCircle, ChevronDown, CheckCircle, Smartphone, Users, Award } from 'lucide-react';
 
 const Modal = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;
@@ -173,12 +173,13 @@ const LandingPage = () => {
             <section className="steps-section">
                 <div className="section-header">
                     <h2>Your Journey to Balance</h2>
+                    <p>Three simple phases to unlock your cognitive potential.</p>
                 </div>
                 <div className="steps-container">
                     {[
-                        { step: "01", title: "Assessment", desc: "Complete a quick cognitive & lifestyle quiz." },
-                        { step: "02", title: "Calibration", desc: "AI builds your personalized dashboard." },
-                        { step: "03", title: "Optimization", desc: "Learn with content that adapts to you." }
+                        { step: "01", title: "Assessment", desc: "Complete our neuro-profile quiz to calibrate the AI to your specific IQ, EQ, and personality." },
+                        { step: "02", title: "Calibration", desc: "Our engine builds your personalized dashboard with custom simulation engines and study windows." },
+                        { step: "03", title: "Optimization", desc: "Learn with adaptive content that responds to your biometrics, preventing burnout before it happens." }
                     ].map((item, idx) => (
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
@@ -194,6 +195,64 @@ const LandingPage = () => {
                             </div>
                         </motion.div>
                     ))}
+                </div>
+            </section>
+
+            {/* Impact Statistics Section */}
+            <section className="stats-section">
+                <div className="stats-grid">
+                    <div className="stat-item">
+                        <div className="stat-value">94%</div>
+                        <div className="stat-label">Retention Increase</div>
+                    </div>
+                    <div className="stat-item">
+                        <div className="stat-value">2.5h</div>
+                        <div className="stat-label">Time Saved Weekly</div>
+                    </div>
+                    <div className="stat-item">
+                        <div className="stat-value">15k+</div>
+                        <div className="stat-label">Active Investigators</div>
+                    </div>
+                    <div className="stat-item">
+                        <div className="stat-value">Elite</div>
+                        <div className="stat-label">Safety Standards</div>
+                    </div>
+                </div>
+            </section>
+
+            {/* FAQ Section */}
+            <section className="faq-section">
+                <div className="section-header">
+                    <h2>Got Questions?</h2>
+                    <p>Everything you need to know about the CLASE platform.</p>
+                </div>
+                <div className="faq-container">
+                    {[
+                        { q: "How does real-time monitoring work?", a: "We analyze your interaction speed, mouse movements, and focus patterns to estimate cognitive load without ever using your camera or microphone." },
+                        { q: "Is my personal data safe?", a: "CLASE uses bank-grade AES-256 encryption. Your cognitive profile is strictly private and used only for local environment adaptation." },
+                        { q: "Can I use this for any subject?", a: "Yes. Our AI engine is subject-agnostic. Whether it's Quantum Physics or Creative Writing, the adaptive principles remain the same." },
+                        { q: "What happens during a stress spike?", a: "The UI automatically transitions to a lower intensity mode, simplifying visual complexity and suggesting a 2-minute flow break." },
+                        { q: "Is CLASE free for students?", a: "We offer a fully functional free tier for individuals. Institutional licenses are available for universities and research labs." }
+                    ].map((item, idx) => (
+                        <details key={idx} className="faq-item glass">
+                            <summary className="faq-question">
+                                <span>{item.q}</span>
+                                <ChevronDown size={18} />
+                            </summary>
+                            <div className="faq-answer">
+                                <p>{item.a}</p>
+                            </div>
+                        </details>
+                    ))}
+                </div>
+            </section>
+
+            {/* Final CTA */}
+            <section className="cta-section">
+                <div className="cta-card glass">
+                    <h2>Ready to balance your flow?</h2>
+                    <p>Join the future of cognitive-aware education today.</p>
+                    <button onClick={() => openModal(true)} className="btn btn-primary btn-lg">Get Started Now</button>
                 </div>
             </section>
 
