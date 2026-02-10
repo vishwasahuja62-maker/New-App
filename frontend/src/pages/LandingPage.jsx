@@ -61,10 +61,13 @@ const LandingPage = () => {
 
     return (
         <div className="landing-container">
-            {/* Dynamic Background */}
+            {/* Premium Animated Background */}
             <div className="bg-blobs">
                 <div className="bg-glow-1"></div>
                 <div className="bg-glow-2"></div>
+                <div className="bg-glow-3"></div>
+                <div className="bg-noise"></div>
+                <div className="bg-lines"></div>
             </div>
 
             {/* Navbar */}

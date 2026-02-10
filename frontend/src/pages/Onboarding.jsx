@@ -121,6 +121,13 @@ const Onboarding = () => {
 
     return (
         <div className="onboarding-container">
+            {/* Dynamic Background */}
+            <div className="bg-blobs">
+                <div className="bg-glow-1"></div>
+                <div className="bg-glow-2"></div>
+                <div className="bg-glow-3"></div>
+            </div>
+
             <header className="onboarding-header">
                 <h2>Phase {phase} <span className="phase-name">{phase === 1 ? ": Cognitive Assessment" : phase === 2 ? ": Lifestyle & Learning" : ": Safety Net"}</span></h2>
             </header>
