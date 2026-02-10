@@ -1,0 +1,77 @@
+[
+    {
+        "id": 1,
+        "type": "subject",
+        "title": "Mathematics",
+        "videos": [
+            {
+                "title": "Calculus for Beginners",
+                "url": "https://www.youtube.com/watch?v=W3WICjSIn98"
+            },
+            {
+                "title": "Linear Algebra Explained",
+                "url": "https://www.youtube.com/watch?v=fNk_zzaMoSs"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "type": "subject",
+        "title": "Physics",
+        "videos": [
+            {
+                "title": "Quantum Mechanics 101",
+                "url": "https://www.youtube.com/watch?v=Usu9xZFABPM"
+            },
+            {
+                "title": "Classical Mechanics",
+                "url": "https://www.youtube.com/watch?v=pyX8kQ-JzHI"
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "type": "subject",
+        "title": "Chemistry",
+        "videos": [
+            {
+                "title": "Organic Chemistry Basics",
+                "url": "https://www.youtube.com/watch?v=G_Pz70V0InI"
+            },
+            {
+                "title": "Chemical Bonding",
+                "url": "https://www.youtube.com/watch?v=B_97i8v61pE"
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "type": "subject",
+        "title": "Biology",
+        "videos": [
+            {
+                "title": "Cell Biology Overview",
+                "url": "https://www.youtube.com/watch?v=8IlzKri08kk"
+            },
+            {
+                "title": "Genetics & DNA",
+                "url": "https://www.youtube.com/watch?v=8m6hH8_ID2E"
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "type": "topic",
+        "title": "Emotional Intelligence",
+        "videos": [
+            {
+                "title": "Understanding EQ",
+                "url": "https://www.youtube.com/watch?v=LgUCyWhJf6s"
+            },
+            {
+                "title": "Managing Stress in Study",
+                "url": "https://www.youtube.com/watch?v=15GaKTP0gu8"
+            }
+        ]
+    }
+]
