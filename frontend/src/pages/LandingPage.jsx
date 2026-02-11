@@ -39,19 +39,35 @@ const FeatureCard = ({ icon: Icon, title, desc, delay }) => (
 
 const LandingPage = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, register } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
+    const [error, setError] = useState('');
 
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
 
-    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+        setError('');
+    };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        login({ name: isSignUp ? formData.name : "User", email: formData.email });
-        setIsModalOpen(false);
-        navigate('/onboarding');
+        setError('');
+
+        let result;
+        if (isSignUp) {
+            result = await register(formData);
+        } else {
+            result = await login({ email: formData.email, password: formData.password });
+        }
+
+        if (result.success) {
+            setIsModalOpen(false);
+            navigate('/onboarding');
+        } else {
+            setError(result.message);
+        }
     };
 
     const openModal = (signupMode = false) => {
@@ -235,6 +251,7 @@ const LandingPage = () => {
                 {isModalOpen && (
                     <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                         <h2 className="modal-title">{isSignUp ? "Create Account" : "Welcome Back"}</h2>
+                        {error && <div className="auth-error-message">{error}</div>}
                         <form onSubmit={handleSubmit} className="login-form">
                             {isSignUp && (
                                 <div className="form-group">

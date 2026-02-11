@@ -1,12 +1,18 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext();
+
+// Ensure axios sends cookies with every request
+axios.defaults.withCredentials = true;
+const API_URL = 'http://localhost:5000/api/users';
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [onboardingStep, setOnboardingStep] = useState(0); // 0: Not started, 1: Phase 1, 2: Phase 2, 3: Phase 3
   const [userProfile, setUserProfile] = useState({
     iq: 0,
@@ -18,17 +24,62 @@ export const AuthProvider = ({ children }) => {
     parentContact: '',
   });
 
-  // Mock login function
-  const login = (userData) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    // In a real app, we'd fetch profile from backend
+  // Check if user is logged in on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/profile`);
+        setUser(res.data);
+        setIsAuthenticated(true);
+      } catch (err) {
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  const login = async (userData) => {
+    try {
+      const res = await axios.post(`${API_URL}/login`, userData);
+      setUser(res.data);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (err) {
+      console.error('Login error:', err);
+      return {
+        success: false,
+        message: err.response?.data?.message || 'Login failed. Please check your credentials.'
+      };
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    setOnboardingStep(0);
+  const register = async (userData) => {
+    try {
+      const res = await axios.post(`${API_URL}/register`, userData);
+      setUser(res.data);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (err) {
+      console.error('Registration error:', err);
+      return {
+        success: false,
+        message: err.response?.data?.message || 'Registration failed.'
+      };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await axios.post(`${API_URL}/logout`);
+      setUser(null);
+      setIsAuthenticated(false);
+      setOnboardingStep(0);
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
   };
 
   const updateProfile = (data) => {
@@ -42,18 +93,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated, 
-      login, 
-      logout, 
-      onboardingStep, 
-      setOnboardingStep, 
-      userProfile, 
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated,
+      loading,
+      login,
+      register,
+      logout,
+      onboardingStep,
+      setOnboardingStep,
+      userProfile,
       updateProfile,
       completeOnboarding
     }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

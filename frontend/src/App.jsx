@@ -13,10 +13,17 @@ const ProtectedRoute = ({ children }) => {
 
 // Wrapper because useAuth must be inside provider
 const AppRoutes = () => {
+  const { isAuthenticated, onboardingStep } = useAuth();
+
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/" element={isAuthenticated ? (onboardingStep < 4 ? <Navigate to="/onboarding" /> : <Navigate to="/dashboard" />) : <LandingPage />} />
+      <Route
+        path="/onboarding"
+        element={
+          isAuthenticated ? <Onboarding /> : <Navigate to="/" />
+        }
+      />
       <Route
         path="/dashboard"
         element={
