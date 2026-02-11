@@ -26,6 +26,7 @@ const registerUser = async (req, res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                onboardingStep: user.onboardingStep,
             });
         } else {
             res.status(400).json({ message: 'Invalid user data' });
@@ -54,6 +55,7 @@ const loginUser = async (req, res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                onboardingStep: user.onboardingStep,
             });
         } else {
             res.status(401).json({ message: 'Invalid email or password' });
@@ -77,10 +79,26 @@ const getUserProfile = async (req, res) => {
             _id: req.user._id,
             name: req.user.name,
             email: req.user.email,
+            onboardingStep: req.user.onboardingStep,
         });
     } else {
         res.status(404).json({ message: 'User not found' });
     }
 };
 
-module.exports = { registerUser, loginUser, logoutUser, getUserProfile };
+const updateOnboardingStep = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (user) {
+            user.onboardingStep = req.body.onboardingStep;
+            await user.save();
+            res.json({ message: 'Onboarding step updated' });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, logoutUser, getUserProfile, updateOnboardingStep };

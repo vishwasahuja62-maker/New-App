@@ -31,6 +31,10 @@ export const AuthProvider = ({ children }) => {
         const res = await axios.get(`${API_URL}/profile`);
         setUser(res.data);
         setIsAuthenticated(true);
+        // Load onboarding step from user profile
+        if (res.data.onboardingStep !== undefined) {
+          setOnboardingStep(res.data.onboardingStep);
+        }
       } catch (err) {
         setUser(null);
         setIsAuthenticated(false);
@@ -41,11 +45,31 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  // Update onboardingStep in database whenever it changes locally
+  useEffect(() => {
+    const syncStep = async () => {
+      if (isAuthenticated && onboardingStep !== undefined) {
+        try {
+          await axios.put(`${API_URL}/onboarding-step`, { onboardingStep });
+        } catch (err) {
+          console.error('Failed to sync onboarding step:', err);
+        }
+      }
+    };
+    // Don't sync during initial load
+    if (!loading) {
+      syncStep();
+    }
+  }, [onboardingStep, isAuthenticated, loading]);
+
   const login = async (userData) => {
     try {
       const res = await axios.post(`${API_URL}/login`, userData);
       setUser(res.data);
       setIsAuthenticated(true);
+      if (res.data.onboardingStep !== undefined) {
+        setOnboardingStep(res.data.onboardingStep);
+      }
       return { success: true };
     } catch (err) {
       console.error('Login error:', err);
@@ -61,6 +85,7 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.post(`${API_URL}/register`, userData);
       setUser(res.data);
       setIsAuthenticated(true);
+      setOnboardingStep(0); // New user starts at 0
       return { success: true };
     } catch (err) {
       console.error('Registration error:', err);
@@ -88,7 +113,7 @@ export const AuthProvider = ({ children }) => {
 
   const completeOnboarding = () => {
     setOnboardingStep(4); // 4 means completed
-    // Save to backend here
+    // Persistence is handled by the useEffect hook above
     localStorage.setItem('clase_user_profile', JSON.stringify(userProfile));
   };
 
