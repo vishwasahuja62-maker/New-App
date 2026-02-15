@@ -3,8 +3,6 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-// Ensure axios sends cookies with every request
-axios.defaults.withCredentials = true;
 const API_URL = 'http://localhost:5000/api/users';
 
 export const useAuth = () => useContext(AuthContext);
@@ -13,58 +11,59 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [onboardingStep, setOnboardingStep] = useState(0); // 0: Not started, 1: Phase 1, 2: Phase 2, 3: Phase 3
+  const [onboardingStep, setOnboardingStep] = useState(0);
   const [userProfile, setUserProfile] = useState({
     iq: 0,
     eq: 0,
     stressLevel: 'normal',
     lifestyle: {},
     difficultSubjects: [],
-    learningMode: 'visual', // 'visual' or 'auditory'
+    learningMode: 'visual',
     parentContact: '',
   });
 
-  // Check if user is logged in on mount
+  // Setup axios to include token from localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
+    }
+  }, [isAuthenticated]);
+
   useEffect(() => {
     const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await axios.get(`${API_URL}/profile`);
-        setUser(res.data);
-        setIsAuthenticated(true);
-        // Load onboarding step from user profile
-        if (res.data.onboardingStep !== undefined) {
-          setOnboardingStep(res.data.onboardingStep);
+        if (res.data) {
+          setUser(res.data);
+          setIsAuthenticated(true);
+          if (res.data.onboardingStep !== undefined) {
+            setOnboardingStep(res.data.onboardingStep);
+          }
         }
       } catch (err) {
-        setUser(null);
+        localStorage.removeItem('token');
         setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
     };
+
     checkAuth();
   }, []);
-
-  // Update onboardingStep in database whenever it changes locally
-  useEffect(() => {
-    const syncStep = async () => {
-      if (isAuthenticated && onboardingStep !== undefined) {
-        try {
-          await axios.put(`${API_URL}/onboarding-step`, { onboardingStep });
-        } catch (err) {
-          console.error('Failed to sync onboarding step:', err);
-        }
-      }
-    };
-    // Don't sync during initial load
-    if (!loading) {
-      syncStep();
-    }
-  }, [onboardingStep, isAuthenticated, loading]);
 
   const login = async (userData) => {
     try {
       const res = await axios.post(`${API_URL}/login`, userData);
+      localStorage.setItem('token', res.data.token);
       setUser(res.data);
       setIsAuthenticated(true);
       if (res.data.onboardingStep !== undefined) {
@@ -72,7 +71,6 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: true };
     } catch (err) {
-      console.error('Login error:', err);
       return {
         success: false,
         message: err.response?.data?.message || 'Login failed. Please check your credentials.'
@@ -83,12 +81,12 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const res = await axios.post(`${API_URL}/register`, userData);
+      localStorage.setItem('token', res.data.token);
       setUser(res.data);
       setIsAuthenticated(true);
-      setOnboardingStep(0); // New user starts at 0
+      setOnboardingStep(0);
       return { success: true };
     } catch (err) {
-      console.error('Registration error:', err);
       return {
         success: false,
         message: err.response?.data?.message || 'Registration failed.'
@@ -96,15 +94,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      await axios.post(`${API_URL}/logout`);
-      setUser(null);
-      setIsAuthenticated(false);
-      setOnboardingStep(0);
-    } catch (err) {
-      console.error('Logout failed', err);
-    }
+  const logout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    setIsAuthenticated(false);
+    setOnboardingStep(0);
   };
 
   const updateProfile = (data) => {
@@ -112,9 +106,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const completeOnboarding = () => {
-    setOnboardingStep(4); // 4 means completed
-    // Persistence is handled by the useEffect hook above
-    localStorage.setItem('clase_user_profile', JSON.stringify(userProfile));
+    setOnboardingStep(4);
   };
 
   return (

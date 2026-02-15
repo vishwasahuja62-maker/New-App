@@ -39,7 +39,7 @@ const FeatureCard = ({ icon: Icon, title, desc, delay }) => (
 
 const LandingPage = () => {
     const navigate = useNavigate();
-    const { login, register } = useAuth();
+    const { login, register, isAuthenticated, logout } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
     const [error, setError] = useState('');
@@ -91,8 +91,17 @@ const LandingPage = () => {
                 <div className="nav-content">
                     <h1 className="logo-text">CLASE</h1>
                     <div className="nav-links">
-                        <button onClick={() => openModal(false)} className="nav-link">Sign In</button>
-                        <button onClick={() => openModal(true)} className="btn btn-primary">Get Started</button>
+                        {isAuthenticated ? (
+                            <>
+                                <button onClick={() => navigate('/dashboard')} className="nav-link">Dashboard</button>
+                                <button onClick={() => logout()} className="btn btn-outline">Logout</button>
+                            </>
+                        ) : (
+                            <>
+                                <button onClick={() => openModal(false)} className="nav-link">Sign In</button>
+                                <button onClick={() => openModal(true)} className="btn btn-primary">Get Started</button>
+                            </>
+                        )}
                     </div>
                 </div>
             </header>
@@ -134,8 +143,11 @@ const LandingPage = () => {
                         transition={{ delay: 0.6, duration: 0.8 }}
                         className="hero-buttons"
                     >
-                        <button onClick={() => openModal(true)} className="btn btn-lg btn-primary">
-                            Start Assessment <ArrowRight size={20} />
+                        <button
+                            onClick={() => isAuthenticated ? navigate('/onboarding') : openModal(true)}
+                            className="btn btn-lg btn-primary"
+                        >
+                            {isAuthenticated ? "Continue Session" : "Start Assessment"} <ArrowRight size={20} />
                         </button>
                         <button className="btn btn-lg btn-outline">
                             View Demo

@@ -13,20 +13,12 @@ const registerUser = async (req, res) => {
         const user = await User.create({ name, email, password });
 
         if (user) {
-            const token = generateToken(user._id);
-
-            res.cookie('jwt', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-                maxAge: 30 * 24 * 60 * 60 * 1000,
-            });
-
             res.status(201).json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
                 onboardingStep: user.onboardingStep,
+                token: generateToken(user._id),
             });
         } else {
             res.status(400).json({ message: 'Invalid user data' });
@@ -42,20 +34,12 @@ const loginUser = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (user && (await user.matchPassword(password))) {
-            const token = generateToken(user._id);
-
-            res.cookie('jwt', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-                maxAge: 30 * 24 * 60 * 60 * 1000,
-            });
-
             res.json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
                 onboardingStep: user.onboardingStep,
+                token: generateToken(user._id),
             });
         } else {
             res.status(401).json({ message: 'Invalid email or password' });
@@ -66,10 +50,6 @@ const loginUser = async (req, res) => {
 };
 
 const logoutUser = (req, res) => {
-    res.cookie('jwt', '', {
-        httpOnly: true,
-        expires: new Date(0),
-    });
     res.status(200).json({ message: 'Logged out successfully' });
 };
 
