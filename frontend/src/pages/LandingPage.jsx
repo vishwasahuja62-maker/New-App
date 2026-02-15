@@ -2,20 +2,24 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Activity, Shield, ArrowRight } from 'lucide-react';
+import { Brain, Activity, Shield, ArrowRight, Sparkles, Heart, X, Mail, Lock, User as UserIcon } from 'lucide-react';
 
 const Modal = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;
     return (
         <div className="modal-overlay">
             <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="glass modal-content"
+                initial={{ y: 50, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 50, opacity: 0, scale: 0.95 }}
+                className="premium-modal-card glass"
             >
-                <button className="close-btn" onClick={onClose}>✕</button>
-                {children}
+                <button className="premium-close-btn" onClick={onClose} aria-label="Close">
+                    <X size={20} />
+                </button>
+                <div className="modal-inner-content">
+                    {children}
+                </div>
             </motion.div>
         </div>
     );
@@ -25,15 +29,42 @@ const FeatureCard = ({ icon: Icon, title, desc, delay }) => (
     <motion.div
         initial={{ y: 20, opacity: 0 }}
         whileInView={{ y: 0, opacity: 1 }}
-        transition={{ delay, duration: 0.5 }}
+        whileHover={{ y: -10, scale: 1.02 }}
+        transition={{ delay, duration: 0.5, type: "spring", stiffness: 300 }}
         viewport={{ once: true }}
-        className="glass feature-card"
+        className="glass feature-card-premium"
     >
-        <div className="feature-icon">
-            <Icon size={32} />
+        <div className="feature-icon-wrapper">
+            <Icon size={32} strokeWidth={1.5} />
+            <div className="icon-pulse-bg"></div>
         </div>
-        <h3 className="text-xl font-bold mb-2">{title}</h3>
-        <p className="text-gray-400 leading-relaxed">{desc}</p>
+        <h3 className="feature-title">{title}</h3>
+        <p className="feature-desc">{desc}</p>
+        <div className="card-shine"></div>
+    </motion.div>
+);
+
+const StepItem = ({ step, title, desc, icon: Icon, idx }) => (
+    <motion.div
+        initial={{ opacity: 0, x: -30 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        transition={{ delay: idx * 0.2, duration: 0.6 }}
+        viewport={{ once: true }}
+        className="step-item-premium"
+    >
+        <div className="step-visual">
+            <div className="step-number-pill">{step}</div>
+            <div className="step-line"></div>
+        </div>
+        <div className="step-card glass">
+            <div className="step-icon-box">
+                <Icon size={24} />
+            </div>
+            <div className="step-text">
+                <h3>{title}</h3>
+                <p>{desc}</p>
+            </div>
+        </div>
     </motion.div>
 );
 
@@ -87,9 +118,12 @@ const LandingPage = () => {
             </div>
 
             {/* Navbar */}
-            <header className="landing-navbar glass-nav">
+            <header className="landing-navbar">
                 <div className="nav-content">
-                    <h1 className="logo-text">CLASE</h1>
+                    <div className="logo-container" onClick={() => navigate('/')}>
+                        <img src="/rabbit-logo.jpeg" alt="Logo" className="logo-icon-img" />
+                        <h1 className="logo-text">My True Companion</h1>
+                    </div>
                     <div className="nav-links">
                         {isAuthenticated ? (
                             <>
@@ -162,12 +196,21 @@ const LandingPage = () => {
                     transition={{ delay: 0.5, duration: 1 }}
                     className="hero-visual"
                 >
-                    <div className="visual-card glass">
-                        <div className="mock-chart">
-                            <div className="mock-line"></div>
-                            <div className="mock-dot"></div>
+                    <div className="visual-card glass neural-harmony">
+                        <div className="harmony-core">
+                            <div className="pulse-ring"></div>
+                            <div className="pulse-ring ring-2"></div>
+                            <div className="pulse-ring ring-3"></div>
+                            <div className="core-icon">
+                                <Sparkles size={48} className="icon-glow" />
+                            </div>
                         </div>
-                        <div className="visual-caption">Real-time Cognitive Tracking</div>
+                        <div className="floating-nodes">
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <div key={i} className={`node node-${i}`}></div>
+                            ))}
+                        </div>
+                        <div className="visual-caption">Neural Harmony & Growth</div>
                     </div>
                 </motion.div>
             </section>
@@ -205,25 +248,20 @@ const LandingPage = () => {
                 <div className="section-header">
                     <h2>Your Journey to Balance</h2>
                 </div>
-                <div className="steps-container">
+                <div className="steps-container-premium">
                     {[
-                        { step: "01", title: "Assessment", desc: "Complete a quick cognitive & lifestyle quiz." },
-                        { step: "02", title: "Calibration", desc: "AI builds your personalized dashboard." },
-                        { step: "03", title: "Optimization", desc: "Learn with content that adapts to you." }
+                        { step: "01", title: "Cognitive Assessment", desc: "Complete a quick neuroscience-backed quiz to map your brain's unique rhythms.", icon: Brain },
+                        { step: "02", title: "Personalized Calibration", desc: "Our AI builds a custom biometric dashboard tailored to your cognitive load.", icon: Sparkles },
+                        { step: "03", title: "Dynamic Optimization", desc: "Interact with content that shifts in difficulty and style based on your real-time state.", icon: Activity }
                     ].map((item, idx) => (
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ delay: idx * 0.2 }}
+                        <StepItem
                             key={idx}
-                            className="step-item"
-                        >
-                            <div className="step-number">{item.step}</div>
-                            <div className="step-content">
-                                <h3>{item.title}</h3>
-                                <p>{item.desc}</p>
-                            </div>
-                        </motion.div>
+                            idx={idx}
+                            step={item.step}
+                            title={item.title}
+                            desc={item.desc}
+                            icon={item.icon}
+                        />
                     ))}
                 </div>
             </section>
@@ -232,7 +270,10 @@ const LandingPage = () => {
             <footer className="landing-footer">
                 <div className="footer-content">
                     <div className="footer-brand">
-                        <h2>CLASE</h2>
+                        <div className="footer-logo">
+                            <img src="/rabbit-logo.jpeg" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
+                            <h2>My True Companion</h2>
+                        </div>
                         <p>Optimizing human potential through adaptive learning and cognitive science.</p>
                     </div>
                     <div className="footer-col">
@@ -255,63 +296,75 @@ const LandingPage = () => {
                     </div>
                 </div>
                 <div className="footer-bottom">
-                    © 2026 CLASE Inc. All rights reserved. Built with passion for better learning.
+                    © 2026 My True Companion Inc. All rights reserved. Built with passion for better learning.
                 </div>
             </footer>
 
             <AnimatePresence>
                 {isModalOpen && (
                     <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                        <h2 className="modal-title">{isSignUp ? "Create Account" : "Welcome Back"}</h2>
+                        <div className="auth-header">
+                            <h2 className="modal-title">{isSignUp ? "Create Journey" : "Welcome Back"}</h2>
+                            <p className="modal-subtitle">
+                                {isSignUp ? "Start your personalized cognitive optimization." : "Resume your progress with My True Companion."}
+                            </p>
+                        </div>
+
                         {error && <div className="auth-error-message">{error}</div>}
-                        <form onSubmit={handleSubmit} className="login-form">
+
+                        <form onSubmit={handleSubmit} className="login-form-premium">
                             {isSignUp && (
-                                <div className="form-group">
-                                    <label>Full Name</label>
+                                <div className="premium-field-group">
+                                    <label><UserIcon size={14} /> Full Name</label>
                                     <input
                                         type="text"
                                         name="name"
                                         value={formData.name}
                                         onChange={handleChange}
-                                        className="input-field"
+                                        className="premium-input-field"
                                         placeholder="John Doe"
                                         required
                                     />
                                 </div>
                             )}
-                            <div className="form-group">
-                                <label>Email</label>
+                            <div className="premium-field-group">
+                                <label><Mail size={14} /> Email Address</label>
                                 <input
                                     type="email"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className="input-field"
+                                    className="premium-input-field"
                                     placeholder="name@example.com"
                                     required
                                 />
                             </div>
-                            <div className="form-group">
-                                <label>Password</label>
+                            <div className="premium-field-group">
+                                <label><Lock size={14} /> Password</label>
                                 <input
                                     type="password"
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    className="input-field"
+                                    className="premium-input-field"
                                     placeholder="••••••••"
                                     required
                                 />
                             </div>
 
-                            <button type="submit" className="btn btn-primary w-full">
-                                {isSignUp ? "Sign Up & Start" : "Log In"}
-                            </button>
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                type="submit"
+                                className="btn btn-primary btn-lg w-full mt-4"
+                            >
+                                {isSignUp ? "Initialize Account" : "Access Dashboard"}
+                            </motion.button>
 
-                            <p className="form-footer">
-                                {isSignUp ? "Already have an account?" : "Don't have an account?"}
-                                <span className="link" onClick={() => setIsSignUp(!isSignUp)}>
-                                    {isSignUp ? " Sign In" : " Sign Up"}
+                            <p className="form-footer-premium">
+                                {isSignUp ? "Already a companion?" : "New to the platform?"}
+                                <span className="link-premium" onClick={() => setIsSignUp(!isSignUp)}>
+                                    {isSignUp ? " Sign In" : " Get Started"}
                                 </span>
                             </p>
                         </form>

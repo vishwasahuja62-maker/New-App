@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, motionValue, useSpring } from 'framer-motion';
+import { Brain, Activity, Heart, Sparkles, ChevronRight, CheckCircle2, ShieldCheck, User, Phone, Users } from 'lucide-react';
 import { phase1Questions, phase2Questions } from '../data';
 import '../onboarding.css';
 
@@ -16,24 +17,37 @@ const ProgressBar = ({ progress }) => {
     );
 };
 
-const QuestionCard = ({ question, onAnswer, currentAnswer }) => {
+const QuestionCard = ({ question, onAnswer, currentAnswer, totalSteps, currentIndex }) => {
     return (
         <motion.div
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -50, opacity: 0 }}
-            className="glass question-card"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            className="premium-question-card"
         >
-            <h3 className="question-text">{question.text}</h3>
-            <div className="options-grid">
+            <div className="question-header">
+                <span className="question-count">Assessment {currentIndex + 1} of {totalSteps}</span>
+                <h3 className="question-text">{question.text}</h3>
+            </div>
+
+            <div className="options-container">
                 {question.options.map((option, idx) => (
-                    <button
+                    <motion.button
                         key={idx}
-                        className={`option-btn ${currentAnswer === option ? 'selected' : ''}`}
+                        whileHover={{ scale: 1.02, x: 5 }}
+                        whileTap={{ scale: 0.98 }}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        className={`premium-option-btn ${currentAnswer === option ? 'selected' : ''}`}
                         onClick={() => onAnswer(option)}
                     >
-                        {option}
-                    </button>
+                        <div className="option-indicator">
+                            {currentAnswer === option && <CheckCircle2 size={18} />}
+                        </div>
+                        <span className="option-label">{option}</span>
+                        <ChevronRight className="option-arrow" size={16} />
+                    </motion.button>
                 ))}
             </div>
         </motion.div>
@@ -121,33 +135,47 @@ const Onboarding = () => {
 
     return (
         <div className="onboarding-container">
-            {/* Dynamic Background */}
-            <div className="bg-blobs">
-                <div className="bg-glow-1"></div>
-                <div className="bg-glow-2"></div>
-                <div className="bg-glow-3"></div>
+            <div className="onboarding-bg-layer">
+                <div className="glow-orb orb-1"></div>
+                <div className="glow-orb orb-2"></div>
+                <div className="noise-overlay"></div>
             </div>
 
-            <header className="onboarding-header">
-                <h2>Phase {phase} <span className="phase-name">{phase === 1 ? ": Cognitive Assessment" : phase === 2 ? ": Lifestyle & Learning" : ": Safety Net"}</span></h2>
-            </header>
+            <div className="onboarding-inner">
+                <header className="onboarding-header">
+                    <div className="brand-badge">
+                        <Sparkles size={16} />
+                        <span>My True Companion AI</span>
+                    </div>
+                    <h1>
+                        {phase === 1 ? "Cognitive Analysis" : phase === 2 ? "Lifestyle Calibration" : "Safety Protocol"}
+                    </h1>
+                    <p className="phase-desc">
+                        {phase === 1 ? "Mapping your mental landscape for personalized support." :
+                            phase === 2 ? "Understanding your world to optimize your environment." :
+                                "Setting up your emergency support network."}
+                    </p>
+                </header>
 
-            <div className="main-content-area">
-                <AnimatePresence mode="wait">
-                    {phase < 3 ? (
-                        <div className="question-wrapper">
-                            <ProgressBar progress={(currentQIndex / totalQuestions) * 100} />
-                            <QuestionCard
-                                key={currentQuestions[currentQIndex].id}
-                                question={currentQuestions[currentQIndex]}
-                                onAnswer={handleAnswer}
-                                currentAnswer={answers[currentQuestions[currentQIndex].id]}
-                            />
-                        </div>
-                    ) : (
-                        <ParentContactForm onSubmit={handeContactSubmit} />
-                    )}
-                </AnimatePresence>
+                <div className="assessment-stage">
+                    <AnimatePresence mode="wait">
+                        {phase < 3 ? (
+                            <div className="stage-content">
+                                <ProgressBar progress={(currentQIndex / totalQuestions) * 100} />
+                                <QuestionCard
+                                    key={`${phase}-${currentQIndex}`}
+                                    question={currentQuestions[currentQIndex]}
+                                    onAnswer={handleAnswer}
+                                    currentAnswer={answers[currentQuestions[currentQIndex].id]}
+                                    totalSteps={totalQuestions}
+                                    currentIndex={currentQIndex}
+                                />
+                            </div>
+                        ) : (
+                            <ParentContactForm onSubmit={handeContactSubmit} />
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
         </div>
     );

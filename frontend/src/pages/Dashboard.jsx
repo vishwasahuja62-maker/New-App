@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import {
     BookOpen, Calendar, Activity, Zap, PlayCircle, LogOut,
-    Bell, Search, GraduationCap, Layout, Settings, User, ExternalLink, Filter, Save, CheckCircle, Info, TrendingUp, Clock, Target, FileText, HelpCircle, Globe, X, Layers, Cpu, Radio, ChevronRight, Bookmark, Shield, Sliders, Award, Brain, RefreshCw, List
+    Bell, Search, GraduationCap, Layout, Settings, User, ExternalLink, Filter, Save, CheckCircle, Info, TrendingUp, Clock, Target, FileText, HelpCircle, Globe, X, Layers, Cpu, Radio, ChevronRight, Bookmark, Shield, Sliders, Award, Brain, RefreshCw, List, Menu
 } from 'lucide-react';
 import libraryData from '../libraryData.json';
 import '../dashboard.css';
@@ -73,16 +73,16 @@ const CognitiveMonitor = () => {
             </div>
             <div className="card quick-stats">
                 <div className="mini-stat">
-                    <div className="stat-icon" style={{ background: 'rgba(52, 211, 153, 0.1)', color: '#10b981' }}><Zap size={20} /></div>
-                    <div className="stat-info"><h4>Dynamic Focus</h4><p>{currentScore}%</p></div>
+                    <div className="stat-icon" style={{ background: 'rgba(52, 211, 153, 0.1)', color: 'var(--success-color)' }}><Target /></div>
+                    <div className="stat-info"><h4>Goal Progress</h4><p>84%</p></div>
                 </div>
-                <div className="mini-stat" style={{ marginTop: '1rem' }}>
-                    <div className="stat-icon" style={{ background: 'rgba(248, 113, 113, 0.1)', color: '#f87171' }}><Activity size={20} /></div>
-                    <div className="stat-info"><h4>Neuro Stress</h4><p>{stressLevel}%</p></div>
+                <div className="mini-stat">
+                    <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.1)', color: 'var(--accent-color)' }}><TrendingUp /></div>
+                    <div className="stat-info"><h4>Current Focus</h4><p>Elite</p></div>
                 </div>
-                <div className="mini-stat" style={{ marginTop: '1rem' }}>
-                    <div className="stat-icon" style={{ background: 'rgba(129, 140, 248, 0.1)', color: '#818cf8' }}><TrendingUp size={20} /></div>
-                    <div className="stat-info"><h4>Efficiency</h4><p>8.4/10</p></div>
+                <div className="mini-stat">
+                    <div className="stat-icon" style={{ background: 'rgba(244, 114, 182, 0.1)', color: 'var(--secondary-color)' }}><Award /></div>
+                    <div className="stat-info"><h4>Rank</h4><p>Top 5%</p></div>
                 </div>
             </div>
         </>
@@ -101,6 +101,7 @@ const Dashboard = () => {
     const [selectionMode, setSelectionMode] = useState(null);
     const [curriculumModule, setCurriculumModule] = useState(null);
     const [isOptimizing, setIsOptimizing] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     // Detailed Schedule State
     const [schedule, setSchedule] = useState([
@@ -131,7 +132,7 @@ const Dashboard = () => {
             setLearningContent({
                 ...dynamic,
                 mode: userProfile.learningMode || 'visual',
-                summary: `CLASE AI has synchronized an adaptive ${userProfile.learningMode} lesson for "${topic}". Select from simulations, blueprints, or key resources below.`,
+                summary: `My True Companion AI has synchronized an adaptive ${userProfile.learningMode} lesson for "${topic}". Select from simulations, blueprints, or key resources below.`,
             });
             setIsLoadingContent(false);
         }, 1200);
@@ -152,7 +153,7 @@ const Dashboard = () => {
             { title: `${query} Academic Detailed Notes`, url: `https://www.google.com/search?q=${encoded}+detailed+notes+site:edu`, provider: 'University Index', icon: <BookOpen size={20} /> },
             { title: `${query} Engineering Schematic`, url: `https://www.google.com/search?q=${encoded}+schematic+diagram+logic`, provider: 'Diagram Hub', icon: <Target size={20} /> },
             { title: `${query} Research Insight`, url: `https://scholar.google.com/scholar?q=${encoded}`, provider: 'Google Scholar', icon: <GraduationCap size={20} /> },
-            { title: `${query} Concept Breakdown`, url: `https://www.google.com/search?q=${encoded}+expert+explanation+simply`, provider: 'CLASE Verified', icon: <Info size={20} /> }
+            { title: `${query} Concept Breakdown`, url: `https://www.google.com/search?q=${encoded}+expert+explanation+simply`, provider: 'Companion Verified', icon: <Info size={20} /> }
         ];
 
         const resources = [
@@ -255,7 +256,7 @@ const Dashboard = () => {
                                     <Cpu size={40} color="#818cf8" />
                                 </div>
                                 <h1 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '1.5rem' }}>{topic} Sandbox</h1>
-                                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '3rem', lineHeight: '1.6' }}>Choose your interactive pathway. CLASE has scanned the top resources specifically for <strong>{topic}</strong>.</p>
+                                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '3rem', lineHeight: '1.6' }}>Choose your interactive pathway. My True Companion has scanned the top resources specifically for <strong>{topic}</strong>.</p>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', width: '100%' }}>
                                     <button onClick={() => setSelectionMode('sim')} className="glass hover-card" style={{ padding: '2rem', borderRadius: '24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
                                         <PlayCircle size={32} color="#a78bfa" style={{ marginBottom: '1rem' }} />
@@ -300,23 +301,45 @@ const Dashboard = () => {
         <div className="dashboard-grid animate-fade-in">
             <CognitiveMonitor />
             <div className={`card learning-card ${learningContent ? 'expanded' : ''}`}>
-                <div className="card-title"><div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Zap className="icon-yellow" /><h3>Dynamic AI Tutor</h3></div></div>
-                <form onSubmit={handleGenerateContent} className="learning-input-container">
-                    <div style={{ position: 'relative', flex: 1 }}>
-                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '12px', color: '#94a3b8' }} />
-                        <input className="learning-input" style={{ paddingLeft: '40px' }} placeholder="Identify a concept (e.g. DNA, Calculus, History)..." value={topic} onChange={e => setTopic(e.target.value)} />
+                <div className="card-title">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <Brain className="icon-purple" size={24} />
+                        <div>
+                            <h3>Dynamic AI Tutor</h3>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '400' }}>Deep-dive into any academic concept instantly.</p>
+                        </div>
                     </div>
-                    <button type="submit" className="btn btn-primary">{isLoadingContent ? 'Synchronizing...' : 'Generate Plan'}</button>
+                </div>
+                <form onSubmit={handleGenerateContent} className="learning-input-container">
+                    <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
+                        <Search size={18} style={{ marginLeft: '12px', color: 'var(--text-muted)' }} />
+                        <input
+                            className="learning-input"
+                            placeholder="Ask me anything (e.g. Quasar Physics, Roman Law, Cellular Respiration)..."
+                            value={topic}
+                            onChange={e => setTopic(e.target.value)}
+                        />
+                    </div>
+                    <button type="submit" className="btn btn-primary" style={{ padding: '0 1.5rem', borderRadius: '12px' }}>
+                        {isLoadingContent ? <RefreshCw className="animate-spin" size={18} /> : 'Generate Insights'}
+                    </button>
                 </form>
                 {learningContent && (
-                    <div className="animate-fade-in" style={{ marginTop: '1.5rem' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div className="animate-fade-in" style={{ marginTop: '2rem' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.01)', padding: '2rem', borderRadius: '24px', border: '1px solid var(--glass-border)', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.2)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                <h4 style={{ fontSize: '1.5rem', fontWeight: '800' }}>{learningContent.title}</h4>
-                                <span className="badge active">{learningContent.mode?.toUpperCase()} MODE</span>
+                                <h4 style={{ fontSize: '1.75rem', fontWeight: '800', letterSpacing: '-0.02em' }}>{learningContent.title}</h4>
+                                <span className="badge active">{learningContent.mode?.toUpperCase()} ANALYSIS</span>
                             </div>
-                            <p style={{ color: '#cbd5e1', lineHeight: '1.6', marginBottom: '2rem' }}>{learningContent.summary}</p>
-                            <button onClick={() => setIsSimulating(true)} className="btn btn-primary" style={{ width: '100%', padding: '1.2rem', borderRadius: '16px' }}>START INTERACTIVE SESSION</button>
+                            <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2.5rem', fontSize: '1.05rem' }}>{learningContent.summary}</p>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={() => setIsSimulating(true)} className="btn btn-primary" style={{ flex: 1, padding: '1.25rem', borderRadius: '14px', fontWeight: '600' }}>
+                                    <PlayCircle size={20} style={{ marginRight: '8px' }} /> START INTERACTIVE SESSION
+                                </button>
+                                <button className="btn btn-outline" style={{ padding: '0 1.25rem', borderRadius: '14px' }}>
+                                    <Bookmark size={20} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -326,21 +349,36 @@ const Dashboard = () => {
 
     const renderSchedule = () => (
         <div className="view-container animate-fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Calendar size={32} className="icon-purple" />
-                    <div><h2 style={{ fontSize: '2rem', fontWeight: '800' }}>Smart Planner</h2><p style={{ color: '#94a3b8' }}>AI-optimized study windows.</p></div>
+            <div className="view-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <Calendar size={40} className="icon-purple" />
+                    <div>
+                        <h2 className="view-title">Smart Planner</h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>AI-optimized neuro-cognitive study windows.</p>
+                    </div>
                 </div>
-                <button onClick={handleOptimizeSchedule} className="btn btn-outline" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <RefreshCw size={18} className={isOptimizing ? 'animate-spin' : ''} /> {isOptimizing ? 'Re-Balancing...' : 'AI Re-Optimize'}
+                <button className="btn btn-primary" style={{ padding: '0.75rem 1.5rem', borderRadius: '12px' }}>
+                    <RefreshCw size={18} style={{ marginRight: '8px' }} /> RE-OPTIMIZE SCHEDULE
                 </button>
             </div>
-            <div className="schedule-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                {schedule.map(item => (
-                    <div key={item.id} className="card glass hover-card" style={{ padding: '2rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}><span style={{ fontSize: '1.2rem', fontWeight: '800', color: '#818cf8' }}>{item.time}</span><span className={`badge ${item.priority === 'High' ? 'heavy' : 'active'}`}>{item.priority}</span></div>
-                        <h4 style={{ fontSize: '1.1rem', marginBottom: '1.5rem' }}>{item.task}</h4>
-                        <button onClick={() => enterScheduledSession(item)} className="btn btn-primary" style={{ width: '100%', fontSize: '0.85rem' }}>Enter Session</button>
+            <div className="schedule-grid">
+                {[
+                    { time: '09:00 AM', task: 'Advanced Calculus', type: 'Peak Focus', duration: '90m', color: 'var(--primary-color)' },
+                    { time: '11:30 AM', task: 'Quantum Mechanics', type: 'Deep Work', duration: '120m', color: 'var(--accent-color)' },
+                    { time: '02:00 PM', task: 'Organic Chemistry', type: 'Review', duration: '60m', color: 'var(--success-color)' },
+                    { time: '04:30 PM', task: 'Linguistic Analysis', type: 'Creative', duration: '45m', color: 'var(--secondary-color)' }
+                ].map((item, i) => (
+                    <div key={i} className="card schedule-card hover-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                            <div className="badge active" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>{item.duration}</div>
+                            <Clock size={18} style={{ color: 'var(--text-muted)' }} />
+                        </div>
+                        <h4 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>{item.task}</h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Scheduled for {item.time}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color, boxShadow: `0 0 10px ${item.color}` }}></div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: item.color }}>{item.type}</span>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -349,26 +387,55 @@ const Dashboard = () => {
 
     const renderLibrary = () => (
         <div className="view-container animate-fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-                <div><h2 style={{ fontSize: '2.2rem', fontWeight: '900' }}>Content Library</h2><p style={{ color: '#94a3b8' }}>Categorical educational tracks.</p></div>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>{['All', 'Mathematics', 'Physics', 'Biology'].map(cat => (
-                    <button key={cat} onClick={() => setFilterCategory(cat)} className={`btn ${filterCategory === cat ? 'btn-primary' : 'btn-outline'}`}>{cat}</button>
-                ))}</div>
+            <div className="view-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <BookOpen size={40} className="icon-purple" />
+                    <div>
+                        <h2 className="view-title">Research Library</h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Curated intellectual tracks and cognitive resources.</p>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem', background: 'rgba(0,0,0,0.2)', padding: '0.4rem', borderRadius: '14px', border: '1px solid var(--glass-border)' }}>
+                    {['All', 'Mathematics', 'Physics', 'Biology'].map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setFilterCategory(cat)}
+                            className={`btn ${filterCategory === cat ? 'btn-primary' : ''}`}
+                            style={{ borderRadius: '10px', fontSize: '0.8rem', padding: '0.6rem 1.25rem', border: 'none', background: filterCategory === cat ? 'var(--primary-color)' : 'transparent', color: filterCategory === cat ? 'white' : 'var(--text-muted)' }}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
             </div>
-            <div className="library-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
+            <div className="library-grid">
                 {libraryData.filter(item => filterCategory === 'All' || item.title === filterCategory).map(subject => (
-                    <div key={subject.id} className="card glass-card" style={{ padding: '0', overflow: 'hidden' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h3 style={{ fontSize: '1.2rem' }}>{subject.title}</h3><BookOpen size={20} color="#a78bfa" />
+                    <div key={subject.id} className="card hover-card" style={{ padding: '0', background: 'rgba(15, 23, 42, 0.4)' }}>
+                        <div style={{ padding: '2rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(135deg, rgba(129, 140, 248, 0.1) 0%, transparent 100%)' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.25rem' }}>{subject.title}</h3>
+                                <div className="badge active" style={{ fontSize: '0.65rem' }}>12 LESSONS • 4.5 HRS</div>
+                            </div>
+                            <div className="stat-icon" style={{ borderRadius: '12px' }}><Layers size={20} /></div>
                         </div>
                         <div style={{ padding: '1.5rem' }}>
-                            {subject.videos.map((vid, idx) => (
-                                <a key={idx} href={vid.url} target="_blank" rel="noreferrer" className="glass hover-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.2rem', borderRadius: '16px', marginBottom: '1rem', textDecoration: 'none', color: 'white' }}>
-                                    <div style={{ width: '40px', height: '40px', background: 'rgba(129, 140, 248, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlayCircle size={20} color="#818cf8" /></div>
-                                    <div style={{ flex: 1 }}><h5 style={{ fontSize: '0.9rem' }}>{vid.title}</h5><p style={{ fontSize: '0.7rem', color: '#64748b' }}>Lecture</p></div>
-                                </a>
-                            ))}
-                            <button onClick={() => setCurriculumModule(subject)} className="btn btn-outline" style={{ width: '100%', fontSize: '0.8rem' }}>View Module Curriculum</button>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                {subject.videos.slice(0, 3).map((vid, idx) => (
+                                    <div key={idx} className="nav-item" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '1rem', marginBottom: '0.75rem', borderRadius: '16px' }}>
+                                        <div style={{ width: '32px', height: '32px', background: 'rgba(129, 140, 248, 0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '1rem' }}>
+                                            <PlayCircle size={16} color="var(--primary-color)" />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <h5 style={{ fontSize: '0.9rem', fontWeight: '600' }}>{vid.title}</h5>
+                                            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Foundational Theory</p>
+                                        </div>
+                                        <ChevronRight size={16} color="var(--text-muted)" />
+                                    </div>
+                                ))}
+                            </div>
+                            <button onClick={() => setCurriculumModule(subject)} className="btn btn-outline" style={{ width: '100%', borderRadius: '12px', padding: '1rem', fontWeight: '600', borderStyle: 'dashed' }}>
+                                <FileText size={18} style={{ marginRight: '8px' }} /> EXPLORE FULL CURRICULUM
+                            </button>
                         </div>
                     </div>
                 ))}
@@ -378,32 +445,116 @@ const Dashboard = () => {
 
     const renderPerformance = () => (
         <div className="view-container animate-fade-in">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '3rem' }}><TrendingUp size={32} className="icon-purple" /><div><h2 style={{ fontSize: '2.2rem', fontWeight: '900' }}>Biometric Analytics</h2><p style={{ color: '#94a3b8' }}>Focus index vs. retention.</p></div></div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', marginBottom: '2.5rem' }}>
-                <div className="card glass" style={{ padding: '2.5rem' }}><h4 style={{ color: '#94a3b8', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '2rem' }}>Subject Mastery</h4><ResponsiveContainer width="100%" height={300}><RadarChart data={RADAR_DATA}><PolarGrid stroke="#334155" /><PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 12 }} /><Radar name="User" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} /></RadarChart></ResponsiveContainer></div>
-                <div className="card glass" style={{ padding: '2.5rem' }}><h4 style={{ color: '#94a3b8', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '2rem' }}>Study Density</h4><ResponsiveContainer width="100%" height={300}><BarChart data={[{ day: 'Mon', focus: 80, load: 40 }, { day: 'Tue', focus: 65, load: 30 }, { day: 'Wed', focus: 90, load: 50 }, { day: 'Thu', focus: 75, load: 45 }, { day: 'Fri', focus: 85, load: 35 }]}><CartesianGrid strokeDasharray="3 3" stroke="#1e293b" /><XAxis dataKey="day" stroke="#94a3b8" /><YAxis stroke="#94a3b8" /><Tooltip contentStyle={{ backgroundColor: '#020617', border: '1px solid rgba(255,255,255,0.1)' }} /><Bar dataKey="focus" fill="#818cf8" radius={[8, 8, 0, 0]} /><Bar dataKey="load" fill="#34d399" radius={[8, 8, 0, 0]} /></BarChart></ResponsiveContainer></div>
+            <div className="view-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <TrendingUp size={40} className="icon-purple" />
+                    <div>
+                        <h2 className="view-title">Neural Analytics</h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>High-fidelity biometric assessment of cognitive performance.</p>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button className="btn btn-outline" style={{ borderRadius: '12px', padding: '0.75rem 1.25rem' }}>
+                        <FileText size={18} style={{ marginRight: '8px' }} /> EXPORT REPORT
+                    </button>
+                    <button className="btn btn-primary" style={{ borderRadius: '12px', padding: '0.75rem 1.25rem' }}>
+                        <RefreshCw size={18} style={{ marginRight: '8px' }} /> RE-PLAYBACK SESSION
+                    </button>
+                </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-                <div className="card metric-card"><h4>Peak Focus</h4><p className="metric-value">92%</p></div>
-                <div className="card metric-card"><h4>Cognitive Load</h4><p className="metric-value">Low</p></div>
-                <div className="card metric-card"><h4>Session Rank</h4><p className="metric-value">Elite</p></div>
+            <div className="perf-grid">
+                <div className="card perf-chart-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                        <h4 className="perf-chart-title" style={{ margin: 0 }}>Cognitive Mastery Profile</h4>
+                        <div className="badge active" style={{ fontSize: '0.6rem' }}>NORMALIZED DATA</div>
+                    </div>
+                    <div className="chart-container">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={RADAR_DATA} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
+                                <PolarGrid stroke="rgba(255,255,255,0.05)" />
+                                <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-muted)', fontSize: 10, fontWeight: 600 }} />
+                                <Radar name="User" dataKey="A" stroke="var(--primary-color)" fill="var(--primary-color)" fillOpacity={0.3} />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+                <div className="card perf-chart-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                        <h4 className="perf-chart-title" style={{ margin: 0 }}>Retention Efficiency Index</h4>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary-color)' }}></div>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>FOCUS</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success-color)' }}></div>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>LOAD</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="chart-container">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={[{ day: 'Mon', focus: 80, load: 40 }, { day: 'Tue', focus: 65, load: 30 }, { day: 'Wed', focus: 90, load: 50 }, { day: 'Thu', focus: 75, load: 45 }, { day: 'Fri', focus: 85, load: 35 }]}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                                <XAxis dataKey="day" stroke="var(--text-muted)" tick={{ fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                                <YAxis stroke="var(--text-muted)" tick={{ fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                                <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} contentStyle={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--glass-border)', borderRadius: '12px', fontSize: '11px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }} />
+                                <Bar dataKey="focus" fill="var(--primary-color)" radius={[4, 4, 0, 0]} barSize={24} />
+                                <Bar dataKey="load" fill="var(--success-color)" radius={[4, 4, 0, 0]} barSize={24} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+            <div className="metric-grid">
+                <div className="card metric-card">
+                    <h4 style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Peak Focus Velocity</h4>
+                    <p className="metric-value">92%</p>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--success-color)', fontWeight: '700' }}>↑ 4.2% FROM BASELINE</div>
+                </div>
+                <div className="card metric-card">
+                    <h4 style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Neural Latency Index</h4>
+                    <p className="metric-value" style={{ background: 'linear-gradient(135deg, var(--success-color), var(--accent-color))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>LOW</p>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '600' }}>STABLE RANGE</div>
+                </div>
+                <div className="card metric-card">
+                    <h4 style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Global Session Rank</h4>
+                    <p className="metric-value" style={{ background: 'var(--premium-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>ELITE</p>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--secondary-color)', fontWeight: '700' }}>PERCENTILE: 99.2</div>
+                </div>
             </div>
         </div>
     );
 
     const renderSettings = () => (
         <div className="view-container animate-fade-in">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3rem' }}><Settings size={32} className="icon-purple" /><div><h2 style={{ fontSize: '2.2rem', fontWeight: '900' }}>Control Center</h2><p style={{ color: '#94a3b8' }}>Application behavior.</p></div></div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2.5rem' }}>
-                <div className="card glass" style={{ padding: '2.5rem', textAlign: 'center' }}><div className="settings-avatar-large" style={{ margin: '0 auto 1.5rem' }}>{user?.name?.[0]}</div><h3>{user?.name}</h3><div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}><div className="badge success">Active</div><div className="badge active">Pro</div></div></div>
-                <div className="settings-content"><form onSubmit={e => { e.preventDefault(); alert("Profile Sync Complete!"); }} className="card glass" style={{ padding: '3rem' }}>
-                    <div className="settings-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                        <div className="settings-group"><label>Name</label><input className="settings-input" value={settingsForm.name} onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })} /></div>
-                        <div className="settings-group"><label>Email</label><input className="settings-input" value={settingsForm.email} /></div>
+            <div className="view-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <Settings size={32} className="icon-purple" />
+                    <div><h2 className="view-title">Control Center</h2><p style={{ color: '#94a3b8' }}>Application behavior.</p></div>
+                </div>
+            </div>
+            <div className="settings-grid">
+                <div className="card glass settings-user-card">
+                    <div className="settings-avatar-large" style={{ margin: '0 auto 1.5rem' }}>{user?.name?.[0]}</div>
+                    <h3>{user?.name}</h3>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+                        <div className="badge success">Active</div>
+                        <div className="badge active">Pro</div>
                     </div>
-                    <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1.2rem' }}>Synchronize Profile</button>
-                    <button type="button" onClick={logout} className="btn btn-outline" style={{ color: '#f87171', borderColor: 'rgba(248, 113, 113, 0.2)', width: '100%', marginTop: '1rem' }}>Logout</button>
-                </form></div>
+                </div>
+                <div className="settings-form-container">
+                    <form onSubmit={e => { e.preventDefault(); alert("Profile Sync Complete!"); }} className="card glass settings-form-card">
+                        <div className="settings-form-inputs">
+                            <div className="settings-group"><label>Name</label><input className="settings-input" value={settingsForm.name} onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })} /></div>
+                            <div className="settings-group"><label>Email</label><input className="settings-input" value={settingsForm.email} readOnly /></div>
+                        </div>
+                        <div className="settings-actions">
+                            <button type="submit" className="btn btn-primary">Synchronize Profile</button>
+                            <button type="button" onClick={logout} className="btn btn-outline btn-danger">Logout</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );
@@ -412,20 +563,35 @@ const Dashboard = () => {
         <div className="dashboard-container">
             {isSimulating && <SimulationSandbox />}
             {curriculumModule && <CurriculumModal />}
-            <aside className="sidebar">
-                <div className="logo-container" onClick={() => navigate('/')}><div className="logo-icon">C</div><span className="app-name">CLASE</span></div>
+            <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+                <div className="sidebar-header">
+                    <div className="logo-container" onClick={() => { navigate('/'); setIsMobileMenuOpen(false); }}>
+                        <img src="/rabbit-logo.jpeg" alt="Logo" className="logo-icon" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
+                        <span className="app-name">My True Companion</span>
+                    </div>
+                    <button className="mobile-close-btn" onClick={() => setIsMobileMenuOpen(false)}><X size={20} /></button>
+                </div>
                 <nav className="nav-section">
-                    <button className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}><Layout size={18} /> Dashboard</button>
-                    <button className={`nav-item ${activeTab === 'timetable' ? 'active' : ''}`} onClick={() => setActiveTab('timetable')}><Calendar size={18} /> Smart Planner</button>
-                    <button className={`nav-item ${activeTab === 'library' ? 'active' : ''}`} onClick={() => setActiveTab('library')}><BookOpen size={18} /> Library</button>
+                    <button className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}><Layout size={18} /> Dashboard</button>
+                    <button className={`nav-item ${activeTab === 'timetable' ? 'active' : ''}`} onClick={() => { setActiveTab('timetable'); setIsMobileMenuOpen(false); }}><Calendar size={18} /> Smart Planner</button>
+                    <button className={`nav-item ${activeTab === 'library' ? 'active' : ''}`} onClick={() => { setActiveTab('library'); setIsMobileMenuOpen(false); }}><BookOpen size={18} /> Library</button>
                     <div className="nav-divider"></div>
-                    <button className={`nav-item ${activeTab === 'performance' ? 'active' : ''}`} onClick={() => setActiveTab('performance')}><TrendingUp size={18} /> Performance</button>
-                    <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}><Settings size={18} /> Control Center</button>
+                    <button className={`nav-item ${activeTab === 'performance' ? 'active' : ''}`} onClick={() => { setActiveTab('performance'); setIsMobileMenuOpen(false); }}><TrendingUp size={18} /> Performance</button>
+                    <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }}><Settings size={18} /> Control Center</button>
                 </nav>
             </aside>
+            {isMobileMenuOpen && <div className="mobile-overlay" onClick={() => setIsMobileMenuOpen(false)}></div>}
             <main className="main-content">
                 <header className="header-bar">
-                    <div className="welcome-text"><h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1><p>Welcome, investigator {user?.name}</p></div>
+                    <div className="header-left">
+                        <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(true)}>
+                            <Menu size={24} />
+                        </button>
+                        <div className="welcome-text">
+                            <h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
+                            <p>Welcome, investigator {user?.name}</p>
+                        </div>
+                    </div>
                     <div className="user-profile"><div className="avatar" onClick={() => setActiveTab('settings')}>{user?.name?.[0]}</div></div>
                 </header>
                 {activeTab === 'dashboard' && renderOverview()}
