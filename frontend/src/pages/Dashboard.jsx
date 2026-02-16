@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import {
     BookOpen, Calendar, Activity, Zap, PlayCircle, LogOut,
-    Bell, Search, GraduationCap, Layout, Settings, User, ExternalLink, Filter, Save, CheckCircle, Info, TrendingUp, Clock, Target, FileText, HelpCircle, Globe, X, Layers, Cpu, Radio, ChevronRight, Bookmark, Shield, Sliders, Award, Brain, RefreshCw, List, Menu
+    Bell, Search, GraduationCap, Layout, Settings, User, ExternalLink, Filter, Save, CheckCircle, Info, TrendingUp, Clock, Target, FileText, HelpCircle, Globe, X, Layers, Cpu, Radio, ChevronRight, ChevronLeft, Bookmark, Shield, Sliders, Award, Brain, RefreshCw, List, Menu
 } from 'lucide-react';
 import libraryData from '../libraryData.json';
 import '../dashboard.css';
@@ -102,6 +102,7 @@ const Dashboard = () => {
     const [curriculumModule, setCurriculumModule] = useState(null);
     const [isOptimizing, setIsOptimizing] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     // Detailed Schedule State
     const [schedule, setSchedule] = useState([
@@ -563,21 +564,34 @@ const Dashboard = () => {
         <div className="dashboard-container">
             {isSimulating && <SimulationSandbox />}
             {curriculumModule && <CurriculumModal />}
-            <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+            <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''} ${isSidebarCollapsed ? 'collapsed' : ''}`}>
                 <div className="sidebar-header">
                     <div className="logo-container" onClick={() => { navigate('/'); setIsMobileMenuOpen(false); }}>
                         <img src="/rabbit-logo.jpeg" alt="Logo" className="logo-icon" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
                         <span className="app-name">My True Companion</span>
                     </div>
+                    <button className="collapse-btn" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
+                        {isSidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+                    </button>
                     <button className="mobile-close-btn" onClick={() => setIsMobileMenuOpen(false)}><X size={20} /></button>
                 </div>
                 <nav className="nav-section">
-                    <button className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}><Layout size={18} /> Dashboard</button>
-                    <button className={`nav-item ${activeTab === 'timetable' ? 'active' : ''}`} onClick={() => { setActiveTab('timetable'); setIsMobileMenuOpen(false); }}><Calendar size={18} /> Smart Planner</button>
-                    <button className={`nav-item ${activeTab === 'library' ? 'active' : ''}`} onClick={() => { setActiveTab('library'); setIsMobileMenuOpen(false); }}><BookOpen size={18} /> Library</button>
+                    <button className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }} title="Dashboard">
+                        <Layout size={18} /> <span>Dashboard</span>
+                    </button>
+                    <button className={`nav-item ${activeTab === 'timetable' ? 'active' : ''}`} onClick={() => { setActiveTab('timetable'); setIsMobileMenuOpen(false); }} title="Smart Planner">
+                        <Calendar size={18} /> <span>Smart Planner</span>
+                    </button>
+                    <button className={`nav-item ${activeTab === 'library' ? 'active' : ''}`} onClick={() => { setActiveTab('library'); setIsMobileMenuOpen(false); }} title="Library">
+                        <BookOpen size={18} /> <span>Library</span>
+                    </button>
                     <div className="nav-divider"></div>
-                    <button className={`nav-item ${activeTab === 'performance' ? 'active' : ''}`} onClick={() => { setActiveTab('performance'); setIsMobileMenuOpen(false); }}><TrendingUp size={18} /> Performance</button>
-                    <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }}><Settings size={18} /> Control Center</button>
+                    <button className={`nav-item ${activeTab === 'performance' ? 'active' : ''}`} onClick={() => { setActiveTab('performance'); setIsMobileMenuOpen(false); }} title="Performance">
+                        <TrendingUp size={18} /> <span>Performance</span>
+                    </button>
+                    <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }} title="Control Center">
+                        <Settings size={18} /> <span>Control Center</span>
+                    </button>
                 </nav>
             </aside>
             {isMobileMenuOpen && <div className="mobile-overlay" onClick={() => setIsMobileMenuOpen(false)}></div>}
