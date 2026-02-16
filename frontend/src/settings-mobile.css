@@ -1,0 +1,219 @@
+/* Main Dashboard Mobile Adjustments */
+@media (max-width: 1024px) {
+    .main-content {
+        padding: 1.5rem 1rem !important;
+    }
+
+    .sandbox-layout {
+        flex-direction: column !important;
+    }
+
+    .simulation-panel {
+        width: 100% !important;
+        padding: 1.5rem !important;
+    }
+}
+
+.settings-card {
+    padding: 2.5rem;
+}
+
+.settings-header-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.settings-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    gap: 1rem;
+}
+
+.learning-mode-btn {
+    width: 100%;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.theme-color-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.learning-preference-grid {
+    display: grid;
+    gap: 0.75rem;
+}
+
+/* Sidebar Position */
+body[data-sidebar="right"] .dashboard-container {
+    flex-direction: row-reverse;
+}
+
+body[data-sidebar="right"] .sidebar {
+    border-right: none;
+    border-left: 1px solid var(--glass-border);
+}
+
+/* High Contrast Mode */
+body.high-contrast {
+    --glass-bg: rgba(30, 41, 59, 1);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --text-primary: #ffffff;
+    --text-secondary: #fdfdfd;
+    --text-muted: #cbd5e1;
+}
+
+body.high-contrast .card {
+    border-width: 2px;
+}
+
+.settings-responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.settings-wide-card {
+    grid-column: span 2;
+}
+
+/* Enhanced Mobile Responsive Settings */
+@media (max-width: 1024px) {
+    .settings-responsive-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .settings-wide-card {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .settings-responsive-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+    }
+
+    .settings-wide-card {
+        grid-column: span 1 !important;
+    }
+
+    .settings-card {
+        padding: 1.75rem !important;
+    }
+
+    .card.glass {
+        padding: 1.75rem !important;
+    }
+
+    .settings-header-content {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem !important;
+    }
+
+    .view-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+
+    .view-header>div {
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .settings-responsive-grid {
+        gap: 1.25rem !important;
+    }
+
+    .settings-card {
+        padding: 1.5rem !important;
+    }
+
+    .card.glass {
+        padding: 1.5rem !important;
+    }
+
+    .settings-avatar-large {
+        width: 80px !important;
+        height: 80px !important;
+        font-size: 2.5rem !important;
+    }
+
+    .view-title {
+        font-size: 1.5rem !important;
+    }
+
+    .theme-color-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+
+    .learning-preference-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.5rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-responsive-grid {
+        gap: 1rem !important;
+    }
+
+    .settings-card {
+        padding: 1.25rem !important;
+    }
+
+    .card.glass {
+        padding: 1.25rem !important;
+    }
+
+    .view-header {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .view-header h2 {
+        font-size: 1.25rem !important;
+    }
+
+    .view-header p {
+        font-size: 0.85rem !important;
+    }
+
+    .settings-input {
+        font-size: 0.9rem !important;
+        padding: 0.65rem 0.85rem !important;
+    }
+
+    .btn {
+        padding: 0.85rem 1.25rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .theme-color-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .settings-toggle-row {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .settings-toggle-row>div:first-child {
+        flex: 1;
+    }
+
+    .learning-mode-btn {
+        padding: 0.75rem !important;
+    }
+}

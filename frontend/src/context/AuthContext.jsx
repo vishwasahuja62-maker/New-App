@@ -22,6 +22,14 @@ export const AuthProvider = ({ children }) => {
     parentContact: '',
   });
 
+  const [performanceMetrics, setPerformanceMetrics] = useState({
+    Math: 50,
+    Physics: 50,
+    Visual: 50,
+    Auditory: 50,
+    Logic: 50
+  });
+
   // Setup axios to include token from localStorage
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -59,6 +67,29 @@ export const AuthProvider = ({ children }) => {
 
     checkAuth();
   }, []);
+
+  // Load performance metrics for specific user
+  useEffect(() => {
+    if (user && user._id) {
+      const saved = localStorage.getItem(`metrics_${user._id}`);
+      if (saved) {
+        try {
+          setPerformanceMetrics(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to parse metrics", e);
+        }
+      } else {
+        // Reset to defaults for new user
+        setPerformanceMetrics({
+          Math: 50,
+          Physics: 50,
+          Visual: 50,
+          Auditory: 50,
+          Logic: 50
+        });
+      }
+    }
+  }, [user]);
 
   const login = async (userData) => {
     try {
@@ -104,6 +135,16 @@ export const AuthProvider = ({ children }) => {
     setUserProfile((prev) => ({ ...prev, ...data }));
   };
 
+  const updatePerformance = (metrics) => {
+    setPerformanceMetrics((prev) => {
+      const newMetrics = { ...prev, ...metrics };
+      if (user && user._id) {
+        localStorage.setItem(`metrics_${user._id}`, JSON.stringify(newMetrics));
+      }
+      return newMetrics;
+    });
+  };
+
   const setOnboardingStep = async (step, persist = false) => {
     setInternalOnboardingStep(step);
     if (persist && isAuthenticated) {
@@ -117,6 +158,48 @@ export const AuthProvider = ({ children }) => {
   };
 
   const completeOnboarding = async () => {
+    // Calculate metrics based on Onboarding Answers
+    const p1 = userProfile.answersPhase1 || {};
+    const p2 = userProfile.answersPhase2 || {};
+
+    let math = 50;
+    let logic = 50;
+    let visual = 50;
+    let auditory = 50;
+    let physics = 50;
+
+    // Math Calculation
+    if (p1[7] === "17") math += 25;
+    if (p2[2] && p2[2].includes("practice problems")) math += 15;
+    if (p2[1] && p2[1].includes("Mathematics")) math -= 15;
+
+    // Logic Calculation
+    if (p1[8] === "Page") logic += 15;
+    if (p1[9] === "No") logic += 20;
+
+    // Visual Calculation
+    if (p1[10] === "Circle") visual += 20;
+    if (p2[2] && p2[2].includes("Watching diagrams")) visual += 25;
+
+    // Auditory Calculation
+    if (p2[2] && p2[2].includes("Listening")) auditory += 30;
+
+    // Physics Calculation (Derived + Interest)
+    physics = (math + logic) / 2;
+    if (p2[1] && p2[1].includes("Physics")) physics -= 15;
+
+    // Clamp values 0-100
+    const clamp = (num) => Math.min(100, Math.max(10, num));
+
+    const metrics = {
+      Math: clamp(math),
+      Physics: clamp(physics),
+      Visual: clamp(visual),
+      Auditory: clamp(auditory),
+      Logic: clamp(logic)
+    };
+
+    updatePerformance(metrics);
     await setOnboardingStep(4, true);
   };
 
@@ -132,6 +215,8 @@ export const AuthProvider = ({ children }) => {
       setOnboardingStep,
       userProfile,
       updateProfile,
+      performanceMetrics,
+      updatePerformance,
       completeOnboarding
     }}>
       {!loading && children}
