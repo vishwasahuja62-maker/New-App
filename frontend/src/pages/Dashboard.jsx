@@ -13,6 +13,8 @@ import {
     closestCenter,
     KeyboardSensor,
     PointerSensor,
+    MouseSensor,
+    TouchSensor,
     useSensor,
     useSensors,
 } from '@dnd-kit/core';
@@ -27,6 +29,15 @@ import { CSS } from '@dnd-kit/utilities';
 import libraryData from '../libraryData.json';
 import '../dashboard.css';
 import '../settings-mobile.css';
+
+const TIME_SLOTS = [
+    '07:00 AM', '07:30 AM', '08:00 AM', '08:30 AM', '09:00 AM', '09:30 AM',
+    '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
+    '01:00 PM', '01:30 PM', '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM',
+    '04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM', '06:00 PM', '06:30 PM',
+    '07:00 PM', '07:30 PM', '08:00 PM', '08:30 PM', '09:00 PM', '09:30 PM',
+    '10:00 PM', '10:30 PM', '11:00 PM', '11:30 PM'
+];
 
 // RADAR_DATA moved inside component for dynamic access
 
@@ -253,7 +264,7 @@ const SortableScheduleItem = ({ item, onEdit, playSound }) => {
                     <div
                         {...attributes}
                         {...listeners}
-                        style={{ cursor: 'grab', display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}
+                        style={{ cursor: 'grab', display: 'flex', alignItems: 'center', color: 'var(--text-muted)', touchAction: 'none' }}
                         className="drag-handle"
                     >
                         <GripVertical size={18} />
@@ -310,6 +321,7 @@ const Dashboard = () => {
     const [activeSettingsCategory, setActiveSettingsCategory] = useState(null);
     const [isNavDropdownOpen, setIsNavDropdownOpen] = useState(false);
     const [isLibraryDropdownOpen, setIsLibraryDropdownOpen] = useState(false);
+    const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
     // Detailed Schedule State
     const [schedule, setSchedule] = useState([
@@ -323,7 +335,17 @@ const Dashboard = () => {
     const [scheduleError, setScheduleError] = useState('');
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(MouseSensor, {
+            activationConstraint: {
+                distance: 10,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250,
+                tolerance: 5,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
@@ -336,8 +358,21 @@ const Dashboard = () => {
             setSchedule((items) => {
                 const oldIndex = items.findIndex((i) => i.id === active.id);
                 const newIndex = items.findIndex((i) => i.id === over.id);
-                return arrayMove(items, oldIndex, newIndex);
+
+                // Create a copy to work with
+                const newItems = [...items];
+
+                // Swap the time slots between the two items
+                const timeA = newItems[oldIndex].time;
+                const timeB = newItems[newIndex].time;
+
+                newItems[oldIndex] = { ...newItems[oldIndex], time: timeB };
+                newItems[newIndex] = { ...newItems[newIndex], time: timeA };
+
+                // Return the array with the moved item
+                return arrayMove(newItems, oldIndex, newIndex);
             });
+            playSound('click');
         }
     };
 
@@ -479,6 +514,17 @@ const Dashboard = () => {
         }
     }, [settingsForm]);
 
+    // Close dropdowns on outside click
+    useEffect(() => {
+        const handleClickOutside = () => {
+            setIsNavDropdownOpen(false);
+            setIsUserDropdownOpen(false);
+            setIsLibraryDropdownOpen(false);
+        };
+        window.addEventListener('click', handleClickOutside);
+        return () => window.removeEventListener('click', handleClickOutside);
+    }, []);
+
     const handleGenerateContent = (e) => {
         if (e) e.preventDefault();
         if (!topic) return;
@@ -531,10 +577,51 @@ const Dashboard = () => {
 
     const handleOptimizeSchedule = () => {
         setIsOptimizing(true);
+        playSound('success');
+
         setTimeout(() => {
-            setSchedule([...schedule].sort(() => Math.random() - 0.5));
+            // Get all available subjects from library
+            const subjects = libraryData.map(s => s.title);
+            const shuffledSubjects = [...subjects].sort(() => 0.5 - Math.random());
+
+            // Define some session variations
+            const types = ['Focus', 'Practical', 'Interactive', 'Review', 'Deep Work'];
+            const priorities = ['High', 'Medium', 'Low'];
+
+            // Pick a set of time slots
+            const morningSlots = ['09:00 AM', '10:00 AM', '11:00 AM'];
+            const afternoonSlots = ['02:00 PM', '03:00 PM', '04:00 PM'];
+            const eveningSlots = ['06:00 PM', '07:00 PM', '08:00 PM'];
+
+            const selectedTimeSlots = [...morningSlots, ...afternoonSlots, ...eveningSlots];
+
+            const newSchedule = selectedTimeSlots.map((time, index) => {
+                // Every 3rd slot is a break/rest
+                if ((index + 1) % 3 === 0) {
+                    return {
+                        id: Math.random(),
+                        time,
+                        task: 'Cognitive Rest & Sync',
+                        priority: 'Low',
+                        status: 'Upcoming',
+                        type: 'Rest'
+                    };
+                }
+
+                const subject = shuffledSubjects[index % shuffledSubjects.length];
+                return {
+                    id: Math.random(),
+                    time,
+                    task: `${subject} Masterclass`,
+                    priority: priorities[Math.floor(Math.random() * priorities.length)],
+                    status: 'Upcoming',
+                    type: types[Math.floor(Math.random() * types.length)]
+                };
+            });
+
+            setSchedule(newSchedule);
             setIsOptimizing(false);
-        }, 1500);
+        }, 1800);
     };
 
     const enterScheduledSession = (item) => {
@@ -1237,12 +1324,28 @@ const Dashboard = () => {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Time Slot</label>
-                                    <input
+                                    <select
                                         value={tempScheduleItem.time}
                                         onChange={(e) => setTempScheduleItem({ ...tempScheduleItem, time: e.target.value })}
-                                        placeholder="e.g. 09:00 AM"
-                                        style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: 'white', outline: 'none', fontSize: '1rem' }}
-                                    />
+                                        style={{ width: '100%', background: 'rgba(15, 23, 42, 1)', border: '1px solid var(--glass-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: 'white', outline: 'none', fontSize: '1rem', cursor: 'pointer' }}
+                                    >
+                                        {!TIME_SLOTS.includes(tempScheduleItem.time) && (
+                                            <option value={tempScheduleItem.time}>{tempScheduleItem.time} (Current)</option>
+                                        )}
+                                        {TIME_SLOTS.map(slot => {
+                                            const conflict = schedule.find(item => item.time === slot && item.id !== tempScheduleItem.id);
+                                            return (
+                                                <option
+                                                    key={slot}
+                                                    value={slot}
+                                                    disabled={!!conflict}
+                                                    style={{ background: conflict ? 'rgba(255,255,255,0.05)' : 'rgba(15, 23, 42, 1)', color: conflict ? '#64748b' : 'white' }}
+                                                >
+                                                    {slot} {conflict ? `(Reserved: ${conflict.task})` : '(Available)'}
+                                                </option>
+                                            );
+                                        })}
+                                    </select>
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Priority</label>
@@ -1402,8 +1505,7 @@ const Dashboard = () => {
                                             { id: 'dashboard', label: 'Dashboard', icon: <Layout size={18} /> },
                                             { id: 'timetable', label: 'My Schedule', icon: <Calendar size={18} /> },
                                             { id: 'library', label: 'My Library', icon: <BookOpen size={18} /> },
-                                            { id: 'performance', label: 'My Progress', icon: <TrendingUp size={18} /> },
-                                            { id: 'settings', label: 'Settings', icon: <Settings size={18} /> }
+                                            { id: 'performance', label: 'My Progress', icon: <TrendingUp size={18} /> }
                                         ].map(tab => (
                                             <div
                                                 key={tab.id}
@@ -1425,14 +1527,33 @@ const Dashboard = () => {
                             <p style={{ marginTop: '0.25rem' }}>Hey there, {user?.name}! 👋</p>
                         </div>
                     </div>
-                    <div className="user-profile">
-                        <div className="avatar" onClick={() => { playSound('click'); setActiveTab('settings'); }} style={{ overflow: 'hidden', padding: 0, borderRadius: '50%' }}>
+                    <div className="user-profile" style={{ position: 'relative' }}>
+                        <div className="avatar" onClick={(e) => { e.stopPropagation(); playSound('click'); setIsUserDropdownOpen(!isUserDropdownOpen); }} style={{ overflow: 'hidden', padding: 0, borderRadius: '50%', cursor: 'pointer' }}>
                             <img
                                 src={`https://api.dicebear.com/7.x/notionists/svg?seed=${settingsForm.avatarSeed || 'default'}`}
                                 alt="Profile"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         </div>
+                        {isUserDropdownOpen && (
+                            <div className="user-dropdown animate-scale-in">
+                                <div
+                                    className="dropdown-item"
+                                    onClick={() => { playSound('click'); setActiveTab('settings'); setIsUserDropdownOpen(false); }}
+                                >
+                                    <div className="dropdown-icon-wrapper"><Settings size={18} /></div>
+                                    <span>Settings</span>
+                                </div>
+                                <div
+                                    className="dropdown-item"
+                                    style={{ color: '#f87171' }}
+                                    onClick={() => { playSound('click'); logout(); }}
+                                >
+                                    <div className="dropdown-icon-wrapper" style={{ background: 'rgba(248, 113, 113, 0.1)' }}><LogOut size={18} /></div>
+                                    <span>Logout</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </header>
                 {activeTab === 'dashboard' && renderOverview()}
