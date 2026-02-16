@@ -63,7 +63,7 @@ html {
         radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, var(--color-dark) 100%);
     font-family: 'Outfit', sans-serif;
     color: var(--text-primary);
-    overflow: hidden;
+    /* overflow: hidden;  <-- Removed to allow dropdowns to be visible */
     transition: all 0.4s ease;
 }
 

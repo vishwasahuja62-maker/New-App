@@ -321,7 +321,10 @@ const Dashboard = () => {
     const [activeSettingsCategory, setActiveSettingsCategory] = useState(null);
     const [isNavDropdownOpen, setIsNavDropdownOpen] = useState(false);
     const [isLibraryDropdownOpen, setIsLibraryDropdownOpen] = useState(false);
+
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+    const [displayedSummary, setDisplayedSummary] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
 
     // Detailed Schedule State
     const [schedule, setSchedule] = useState([
@@ -532,14 +535,33 @@ const Dashboard = () => {
         if (!topic) return;
         setIsLoadingContent(true);
         setLearningContent(null);
+        setDisplayedSummary('');
+        setIsTyping(true);
+
         setTimeout(() => {
             const dynamic = generateTopicData(topic);
+            const fullSummary = `Here's your personalized ${userProfile.learningMode || 'visual'} study plan for "${topic}". Pick from videos, notes, or extra help below!`;
+
             setLearningContent({
                 ...dynamic,
                 mode: userProfile.learningMode || 'visual',
-                summary: `Here's your personalized ${userProfile.learningMode} study plan for "${topic}". Pick from videos, notes, or extra help below!`,
+                summary: fullSummary,
             });
             setIsLoadingContent(false);
+
+            // Start typing effect
+            let i = 0;
+            const typeChar = () => {
+                if (i < fullSummary.length) {
+                    setDisplayedSummary(fullSummary.substring(0, i + 1));
+                    i++;
+                    setTimeout(typeChar, 20); // Typing speed
+                } else {
+                    setIsTyping(false);
+                }
+            };
+            typeChar();
+
         }, 1200);
     };
 
@@ -671,7 +693,10 @@ const Dashboard = () => {
                                 <h4 style={{ fontSize: '1.75rem', fontWeight: '800', letterSpacing: '-0.02em' }}>{learningContent.title}</h4>
                                 <span className="badge active">{learningContent.mode?.toUpperCase()} MODE</span>
                             </div>
-                            <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2.5rem', fontSize: '1.05rem' }}>{learningContent.summary}</p>
+                            <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2.5rem', fontSize: '1.05rem', minHeight: '3.4rem' }}>
+                                {displayedSummary}
+                                {isTyping && <span className="animate-pulse">|</span>}
+                            </p>
                             <div style={{ display: 'flex' }}>
                                 <button onClick={() => { playSound('click'); setIsSimulating(true); }} className="btn btn-primary" style={{ padding: '0.8rem 1.8rem', borderRadius: '12px', fontWeight: '600', fontSize: '0.95rem' }}>
                                     <PlayCircle size={18} style={{ marginRight: '8px' }} /> START INTERACTIVE SESSION
@@ -1487,7 +1512,7 @@ const Dashboard = () => {
                         <div className="welcome-text">
                             <div
                                 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', position: 'relative', width: 'fit-content' }}
-                                onClick={() => { playSound('click'); setIsNavDropdownOpen(!isNavDropdownOpen); }}
+                                onClick={(e) => { e.stopPropagation(); playSound('click'); setIsNavDropdownOpen(!isNavDropdownOpen); }}
                                 className="section-title-trigger"
                             >
                                 <h1 style={{ margin: 0 }}>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
