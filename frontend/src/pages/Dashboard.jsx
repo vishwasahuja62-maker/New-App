@@ -389,9 +389,11 @@ const Dashboard = () => {
         setScheduleError('');
     };
 
+    const settingsKey = user?._id ? `dashboard-settings-${user._id}` : 'dashboard-settings';
+
     const [settingsForm, setSettingsForm] = useState(() => {
         const defaults = {
-            name: user?.name || '',
+            name: user?.name || 'New Companion',
             email: user?.email || '',
             bio: 'Advanced visual learner focused on Quantum Physics and Machine Learning.',
             learningMode: userProfile?.learningMode || 'visual',
@@ -405,7 +407,7 @@ const Dashboard = () => {
             themeColor: '#818cf8',
             avatarSeed: Math.random().toString(36).substring(7)
         };
-        const saved = localStorage.getItem('dashboard-settings');
+        const saved = localStorage.getItem(settingsKey);
         return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
     });
 
@@ -477,8 +479,8 @@ const Dashboard = () => {
 
     // Apply settings whenever they change
     useEffect(() => {
-        // Save to localStorage
-        localStorage.setItem('dashboard-settings', JSON.stringify(settingsForm));
+        // Save to localStorage using user specific key
+        localStorage.setItem(settingsKey, JSON.stringify(settingsForm));
 
         // Apply theme color
         if (settingsForm.themeColor) {

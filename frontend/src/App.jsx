@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const InfoPage = lazy(() => import('./pages/InfoPage'));
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -75,7 +76,17 @@ const AppRoutes = () => {
       </div>
     }>
       <Routes>
-        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LandingPage />} />
+        <Route
+          path="/"
+          element={
+            isAuthenticated ? (
+              onboardingStep < 4 ? <Navigate to="/onboarding" /> : <Navigate to="/dashboard" />
+            ) : (
+              <LandingPage />
+            )
+          }
+        />
+        <Route path="/info/:pageId" element={<InfoPage />} />
         <Route
           path="/onboarding"
           element={

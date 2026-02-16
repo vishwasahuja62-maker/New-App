@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Activity, Shield, ArrowRight, Sparkles, Heart, X, Mail, Lock, User as UserIcon } from 'lucide-react';
+import { Brain, Activity, Shield, ArrowRight, Sparkles, Heart, X, Mail, Lock, User as UserIcon, Menu, Globe, Zap, Users, Coffee } from 'lucide-react';
 
 const Modal = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;
@@ -73,6 +73,8 @@ const LandingPage = () => {
     const { login, register, isAuthenticated, logout, onboardingStep } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
+    const [modalHeading, setModalHeading] = useState('');
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [error, setError] = useState('');
 
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -110,9 +112,18 @@ const LandingPage = () => {
         }
     };
 
-    const openModal = (signupMode = false) => {
+    const openModal = (signupMode = false, customHeading = '') => {
         setIsSignUp(signupMode);
+        setModalHeading(customHeading || (signupMode ? "Create Your Account" : "Welcome Back"));
+        setFormData({ name: '', email: '', password: '' });
         setIsModalOpen(true);
+        setIsMobileMenuOpen(false);
+    };
+
+    const openInfo = (key) => {
+        // Convert key to URL-friendly slug
+        const slug = key.toLowerCase().replace(/\s+/g, '-');
+        navigate(`/info/${slug}`);
     };
 
     return (
@@ -133,16 +144,18 @@ const LandingPage = () => {
                         <img src="/rabbit-logo.jpeg" alt="Logo" className="logo-icon-img" />
                         <h1 className="logo-text">My True Companion</h1>
                     </div>
+
+                    {/* Desktop Menu */}
                     <div className="nav-links">
                         {isAuthenticated ? (
                             <>
-                                <button onClick={() => navigate('/dashboard')} className="nav-link">Dashboard</button>
+                                <button onClick={() => navigate('/dashboard')} className="nav-link">Go to Dashboard</button>
                                 <button onClick={() => logout()} className="btn btn-outline">Logout</button>
                             </>
                         ) : (
                             <>
                                 <button onClick={() => openModal(false)} className="nav-link">Sign In</button>
-                                <button onClick={() => openModal(true)} className="btn btn-primary">Get Started</button>
+                                <button onClick={() => openModal(true, "Get Started")} className="btn btn-primary">Get Started</button>
                             </>
                         )}
                     </div>
@@ -158,7 +171,7 @@ const LandingPage = () => {
                         transition={{ duration: 0.8 }}
                         className="hero-badge"
                     >
-                        <span className="badge-dot"></span> AI-Powered Mental Wellness
+                        <span className="badge-dot"></span> A study buddy that understands you
                     </motion.div>
 
                     <motion.h1
@@ -167,8 +180,8 @@ const LandingPage = () => {
                         transition={{ delay: 0.2, duration: 0.8 }}
                         className="hero-headline"
                     >
-                        Master Your Mind.<br />
-                        <span className="gradient-text">Optimize Your Future.</span>
+                        Learn Fast.<br />
+                        <span className="gradient-text">Stress Less.</span>
                     </motion.h1>
 
                     <motion.p
@@ -177,7 +190,7 @@ const LandingPage = () => {
                         transition={{ delay: 0.4, duration: 0.8 }}
                         className="hero-subtext"
                     >
-                        An intelligent adaptive learning environment that monitors your cognitive load in real-time to prevent burnout and maximize retention.
+                        Most apps treat every student the same. We use AI to learn how <i>you</i> learn, so you can master your subjects without ever feeling burnt out.
                     </motion.p>
 
                     <motion.div
@@ -192,12 +205,12 @@ const LandingPage = () => {
                                     if (onboardingStep >= 4) navigate('/dashboard');
                                     else navigate('/onboarding');
                                 } else {
-                                    openModal(true);
+                                    openModal(true, "Start Your Assessment");
                                 }
                             }}
                             className="btn btn-lg btn-primary"
                         >
-                            {isAuthenticated ? (onboardingStep >= 4 ? "Enter Dashboard" : "Continue Session") : "Start Assessment"} <ArrowRight size={20} />
+                            {isAuthenticated ? (onboardingStep >= 4 ? "Enter Dashboard" : "Continue Session") : "Start Your Assessment"} <ArrowRight size={20} />
                         </button>
                         <button className="btn btn-lg btn-outline">
                             View Demo
@@ -229,46 +242,46 @@ const LandingPage = () => {
                         <div className="visual-caption">Neural Harmony & Growth</div>
                     </div>
                 </motion.div>
-            </section>
+            </section >
 
             {/* Features Grid */}
-            <section className="features-section">
+            < section className="features-section" >
                 <div className="section-header">
-                    <h2>Scientific Approach to Learning</h2>
-                    <p>We combine psychology and AI to create the perfect study environment.</p>
+                    <h2>Studying That Feels Natural</h2>
+                    <p>We use tech to keep you focused and happy while you work.</p>
                 </div>
                 <div className="features-grid">
                     <FeatureCard
                         icon={Brain}
-                        title="Cognitive Analysis"
-                        desc="Our initial assessment determines your IQ, EQ, and current mental state to tailor the curriculum."
+                        title="Understanding How You Learn"
+                        desc="We start by finding your unique learning style—whether you learn best by seeing, hearing, or doing."
                         delay={0.1}
                     />
                     <FeatureCard
                         icon={Activity}
-                        title="Live Bio-Feedback"
-                        desc="We monitor your interaction patterns to detect stress spikes and adjust difficulty in real-time."
+                        title="Your Perfect Pace"
+                        desc="The app detects when you're tired and slows down, or speeds up when you've mastered a topic."
                         delay={0.3}
                     />
                     <FeatureCard
                         icon={Shield}
-                        title="Safety Net"
-                        desc="In moments of high depression or anxiety indicators, we discreetly notify your trusted contacts."
+                        title="Stress Support"
+                        desc="If you're feeling overwhelmed, we help you take a break and notify your trusted contact."
                         delay={0.5}
                     />
                 </div>
-            </section>
+            </section >
 
             {/* How It Works */}
-            <section className="steps-section">
+            < section className="steps-section" >
                 <div className="section-header">
-                    <h2>Your Journey to Balance</h2>
+                    <h2>3 Steps to Better Grades</h2>
                 </div>
                 <div className="steps-container-premium">
                     {[
-                        { step: "01", title: "Cognitive Assessment", desc: "Complete a quick neuroscience-backed quiz to map your brain's unique rhythms.", icon: Brain },
-                        { step: "02", title: "Personalized Calibration", desc: "Our AI builds a custom biometric dashboard tailored to your cognitive load.", icon: Sparkles },
-                        { step: "03", title: "Dynamic Optimization", desc: "Interact with content that shifts in difficulty and style based on your real-time state.", icon: Activity }
+                        { step: "01", title: "Take the Quiz", desc: "Start with a 2-minute assessment of your learning style and current mood.", icon: Brain },
+                        { step: "02", title: "AI Calibration", desc: "Our AI builds a custom schedule that fits your daily energy levels.", icon: Sparkles },
+                        { step: "03", title: "Enjoy Learning", desc: "Watch as your subjects adapt to you perfectly, making growth feel easy.", icon: Activity }
                     ].map((item, idx) => (
                         <StepItem
                             key={idx}
@@ -280,89 +293,92 @@ const LandingPage = () => {
                         />
                     ))}
                 </div>
-            </section>
+            </section >
 
             {/* Footer */}
-            <footer className="landing-footer">
+            < footer className="landing-footer" >
                 <div className="footer-content">
                     <div className="footer-brand">
                         <div className="footer-logo">
                             <img src="/rabbit-logo.jpeg" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
                             <h2>My True Companion</h2>
                         </div>
-                        <p>Optimizing human potential through adaptive learning and cognitive science.</p>
+                        <p>We help you reach your goals by understanding how you learn, not just testing what you know.</p>
                     </div>
                     <div className="footer-col">
                         <h4>Platform</h4>
-                        <a href="#">Assessment</a>
-                        <a href="#">Learning Path</a>
-                        <a href="#">Resources</a>
+                        <button className="footer-link-btn" onClick={() => openInfo('Assessment')}>Assessment</button>
+                        <button className="footer-link-btn" onClick={() => openInfo('Learning Path')}>Learning Path</button>
+                        <button className="footer-link-btn" onClick={() => openInfo('Resources')}>Resources</button>
                     </div>
                     <div className="footer-col">
                         <h4>Company</h4>
-                        <a href="#">About Us</a>
-                        <a href="#">Careers</a>
-                        <a href="#">Privacy Policy</a>
+                        <button className="footer-link-btn" onClick={() => openInfo('About Us')}>About Us</button>
+                        <button className="footer-link-btn" onClick={() => openInfo('Careers')}>Careers</button>
+                        <button className="footer-link-btn" onClick={() => openInfo('Privacy Policy')}>Privacy Policy</button>
                     </div>
                     <div className="footer-col">
                         <h4>Connect</h4>
-                        <a href="#">Twitter</a>
-                        <a href="#">Discord</a>
-                        <a href="#">LinkedIn</a>
+                        <button className="footer-link-btn" onClick={() => openInfo('Twitter')}>Twitter</button>
+                        <button className="footer-link-btn" onClick={() => openInfo('Discord')}>Discord</button>
+                        <button className="footer-link-btn" onClick={() => openInfo('LinkedIn')}>LinkedIn</button>
                     </div>
                 </div>
                 <div className="footer-bottom">
-                    © 2026 My True Companion Inc. All rights reserved. Built with passion for better learning.
+                    © 2026 My True Companion Inc. All rights reserved.
                 </div>
-            </footer>
+            </footer >
 
             <AnimatePresence>
                 {isModalOpen && (
                     <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                         <div className="auth-header">
-                            <h2 className="modal-title">{isSignUp ? "Create Journey" : "Welcome Back"}</h2>
-                            <p className="modal-subtitle">
-                                {isSignUp ? "Start your personalized cognitive optimization." : "Resume your progress with My True Companion."}
+                            <h2 className="modal-title" style={{ fontSize: '1.75rem', fontWeight: 800, textAlign: 'center', marginBottom: '1rem' }}>{modalHeading}</h2>
+                            <p className="modal-subtitle" style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '2rem' }}>
+                                {isSignUp ? "Create your free account to see your learning profile." : "Pick up right where you left off."}
                             </p>
                         </div>
 
-                        {error && <div className="auth-error-message">{error}</div>}
+                        {error && <div className="auth-error-message" style={{ background: 'rgba(248, 113, 113, 0.1)', color: '#f87171', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid rgba(248, 113, 113, 0.2)' }}>{error}</div>}
 
-                        <form onSubmit={handleSubmit} className="login-form-premium">
+                        <form onSubmit={handleSubmit} className="login-form-premium" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {isSignUp && (
                                 <div className="premium-field-group">
-                                    <label><UserIcon size={14} /> Full Name</label>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#64748b', marginBottom: '0.25rem' }}><UserIcon size={14} /> Full Name</label>
                                     <input
                                         type="text"
                                         name="name"
                                         value={formData.name}
                                         onChange={handleChange}
                                         className="premium-input-field"
-                                        placeholder="John Doe"
+                                        style={{ width: '100%', padding: '1rem', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'white' }}
+                                        placeholder="Your name"
                                         required
                                     />
                                 </div>
                             )}
                             <div className="premium-field-group">
-                                <label><Mail size={14} /> Email Address</label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#64748b', marginBottom: '0.25rem' }}><Mail size={14} /> Email</label>
                                 <input
                                     type="email"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
                                     className="premium-input-field"
-                                    placeholder="name@example.com"
+                                    style={{ width: '100%', padding: '1rem', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'white' }}
+                                    placeholder="email@example.com"
                                     required
                                 />
                             </div>
                             <div className="premium-field-group">
-                                <label><Lock size={14} /> Password</label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#64748b', marginBottom: '0.25rem' }}><Lock size={14} /> Password</label>
                                 <input
                                     type="password"
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
                                     className="premium-input-field"
+                                    style={{ width: '100%', padding: '1rem', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'white' }}
                                     placeholder="••••••••"
                                     required
                                 />
@@ -372,14 +388,15 @@ const LandingPage = () => {
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 type="submit"
-                                className="btn btn-primary btn-lg w-full mt-4"
+                                className="btn btn-primary btn-lg"
+                                style={{ marginTop: '1rem', width: '100%' }}
                             >
-                                {isSignUp ? "Initialize Account" : "Access Dashboard"}
+                                {isSignUp ? "Start The Quiz" : "Login"}
                             </motion.button>
 
-                            <p className="form-footer-premium">
-                                {isSignUp ? "Already a companion?" : "New to the platform?"}
-                                <span className="link-premium" onClick={() => setIsSignUp(!isSignUp)}>
+                            <p className="form-footer-premium" style={{ textAlign: 'center', marginTop: '1rem', color: '#64748b' }}>
+                                {isSignUp ? "Already have an account?" : "New here?"}
+                                <span className="link-premium" style={{ color: '#a78bfa', cursor: 'pointer', marginLeft: '0.5rem' }} onClick={() => setIsSignUp(!isSignUp)}>
                                     {isSignUp ? " Sign In" : " Get Started"}
                                 </span>
                             </p>
@@ -387,7 +404,7 @@ const LandingPage = () => {
                     </Modal>
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 };
 

@@ -129,6 +129,22 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     setInternalOnboardingStep(0);
+    setUserProfile({
+      iq: 0,
+      eq: 0,
+      stressLevel: 'normal',
+      lifestyle: {},
+      difficultSubjects: [],
+      learningMode: 'visual',
+      parentContact: '',
+    });
+    setPerformanceMetrics({
+      Math: 50,
+      Physics: 50,
+      Visual: 50,
+      Auditory: 50,
+      Logic: 50
+    });
   };
 
   const updateProfile = (data) => {
