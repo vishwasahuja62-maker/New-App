@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import {
     BookOpen, Calendar, Activity, Zap, PlayCircle, LogOut,
-    Bell, Search, GraduationCap, Layout, Settings, User, ExternalLink, Filter, Save, CheckCircle, Info, TrendingUp, Clock, Target, FileText, HelpCircle, Globe, X, Layers, Cpu, Radio, ChevronRight, ChevronLeft, ArrowLeft, Bookmark, Shield, Sliders, Award, Brain, RefreshCw, List, Menu
+    Bell, Search, GraduationCap, Layout, Settings, User, ExternalLink, Filter, Save, CheckCircle, Info, TrendingUp, Clock, Target, FileText, HelpCircle, Globe, X, Layers, Cpu, Radio, ChevronRight, ChevronLeft, ArrowLeft, Bookmark, Shield, Sliders, Award, Brain, RefreshCw, List, Menu, ChevronDown
 } from 'lucide-react';
 import libraryData from '../libraryData.json';
 import '../dashboard.css';
@@ -223,6 +223,7 @@ const Dashboard = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [activeSettingsCategory, setActiveSettingsCategory] = useState(null);
+    const [isNavDropdownOpen, setIsNavDropdownOpen] = useState(false);
 
     // Detailed Schedule State
     const [schedule, setSchedule] = useState([
@@ -245,7 +246,8 @@ const Dashboard = () => {
             dynamicBackground: false,
             soundEffects: false,
             autoSave: true,
-            themeColor: '#818cf8'
+            themeColor: '#818cf8',
+            avatarSeed: Math.random().toString(36).substring(7)
         };
         const saved = localStorage.getItem('dashboard-settings');
         return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
@@ -253,14 +255,58 @@ const Dashboard = () => {
 
     const playSound = (type) => {
         if (!settingsForm.soundEffects) return;
-        const sounds = {
-            click: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
-            success: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'
-        };
-        const audio = new Audio(sounds[type]);
-        audio.volume = 0.4;
-        audio.play().catch(e => console.log('Audio disabled by browser'));
+
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            if (type === 'click') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, ctx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                oscillator.start();
+                oscillator.stop(ctx.currentTime + 0.1);
+            } else if (type === 'success') {
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(400, ctx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
+                oscillator.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                oscillator.start();
+                oscillator.stop(ctx.currentTime + 0.3);
+            }
+        } catch (err) {
+            console.error('Web Audio error:', err);
+        }
     };
+
+    // User interaction "unlock" for audio
+    useEffect(() => {
+        const unlockAudio = () => {
+            if (settingsForm.soundEffects) {
+                // Play a brief silent audio to "unlock" the audio context if needed
+                const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFRm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/wD/');
+                audio.play().catch(() => { });
+            }
+            window.removeEventListener('mousedown', unlockAudio);
+            window.removeEventListener('keydown', unlockAudio);
+        };
+        window.addEventListener('mousedown', unlockAudio);
+        window.addEventListener('keydown', unlockAudio);
+        return () => {
+            window.removeEventListener('mousedown', unlockAudio);
+            window.removeEventListener('keydown', unlockAudio);
+        };
+    }, [settingsForm.soundEffects]);
 
     const [filterCategory, setFilterCategory] = useState('All');
 
@@ -291,10 +337,25 @@ const Dashboard = () => {
         }
 
         // Apply view density
-        document.body.setAttribute('data-density', settingsForm.viewDensity?.toLowerCase() || 'comfortable');
+        const density = settingsForm.viewDensity?.toLowerCase() || 'comfortable';
+        document.body.className = document.body.className
+            .replace(/\b(comfortable|compact)\b/g, '')
+            .trim() + ' ' + density;
+        document.body.setAttribute('data-density', density);
 
         // Apply sidebar position
-        document.body.setAttribute('data-sidebar', settingsForm.sidebarPosition?.toLowerCase() || 'left');
+        const position = settingsForm.sidebarPosition?.toLowerCase() || 'left';
+        document.body.setAttribute('data-sidebar', position);
+
+        // Ensure sidebar-right class is in sync on container
+        const container = document.querySelector('.dashboard-container');
+        if (container) {
+            if (position === 'right') {
+                container.classList.add('sidebar-right');
+            } else {
+                container.classList.remove('sidebar-right');
+            }
+        }
     }, [settingsForm]);
 
     const handleGenerateContent = (e) => {
@@ -379,7 +440,7 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
-                <form onSubmit={handleGenerateContent} className="learning-input-container">
+                <form onSubmit={(e) => { playSound('click'); handleGenerateContent(e); }} className="learning-input-container">
                     <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
                         <Search size={18} style={{ marginLeft: '12px', color: 'var(--text-muted)' }} />
                         <input
@@ -402,7 +463,7 @@ const Dashboard = () => {
                             </div>
                             <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2.5rem', fontSize: '1.05rem' }}>{learningContent.summary}</p>
                             <div style={{ display: 'flex' }}>
-                                <button onClick={() => setIsSimulating(true)} className="btn btn-primary" style={{ padding: '0.8rem 1.8rem', borderRadius: '12px', fontWeight: '600', fontSize: '0.95rem' }}>
+                                <button onClick={() => { playSound('click'); setIsSimulating(true); }} className="btn btn-primary" style={{ padding: '0.8rem 1.8rem', borderRadius: '12px', fontWeight: '600', fontSize: '0.95rem' }}>
                                     <PlayCircle size={18} style={{ marginRight: '8px' }} /> START INTERACTIVE SESSION
                                 </button>
                             </div>
@@ -423,30 +484,45 @@ const Dashboard = () => {
                         <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Your personalized study plan.</p>
                     </div>
                 </div>
-                <button className="btn btn-primary" style={{ padding: '0.75rem 1.5rem', borderRadius: '12px' }}>
+                <button onClick={() => { playSound('click'); handleOptimizeSchedule(); }} className="btn btn-primary" style={{ padding: '0.75rem 1.5rem', borderRadius: '12px' }}>
                     <RefreshCw size={18} style={{ marginRight: '8px' }} /> UPDATE PLAN
                 </button>
             </div>
-            <div className="schedule-grid">
-                {[
-                    { time: '09:00 AM', task: 'Advanced Calculus', type: 'Peak Focus', duration: '90m', color: 'var(--primary-color)' },
-                    { time: '11:30 AM', task: 'Quantum Mechanics', type: 'Deep Work', duration: '120m', color: 'var(--accent-color)' },
-                    { time: '02:00 PM', task: 'Organic Chemistry', type: 'Review', duration: '60m', color: 'var(--success-color)' },
-                    { time: '04:30 PM', task: 'Linguistic Analysis', type: 'Creative', duration: '45m', color: 'var(--secondary-color)' }
-                ].map((item, i) => (
-                    <div key={i} className="card schedule-card hover-card">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                            <div className="badge active" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>{item.duration}</div>
-                            <Clock size={18} style={{ color: 'var(--text-muted)' }} />
-                        </div>
-                        <h4 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>{item.task}</h4>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Scheduled for {item.time}</p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color, boxShadow: `0 0 10px ${item.color}` }}></div>
-                            <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: item.color }}>{item.type}</span>
-                        </div>
+            <div className="schedule-grid" style={{ opacity: isOptimizing ? 0.6 : 1, transition: 'opacity 0.3s ease' }}>
+                {isOptimizing ? (
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px dashed var(--glass-border)' }}>
+                        <RefreshCw size={48} className="icon-purple animate-spin" style={{ marginBottom: '1.5rem' }} />
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.5rem' }}>AI Optimizing Your Plan...</h3>
+                        <p style={{ color: 'var(--text-muted)' }}>Analyzing focus metrics and subject weights</p>
                     </div>
-                ))}
+                ) : (
+                    schedule.map((item) => (
+                        <div key={item.id} className="card schedule-card hover-card">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                                <div className="badge active" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>{item.type}</div>
+                                <Clock size={18} style={{ color: 'var(--text-muted)' }} />
+                            </div>
+                            <h4 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>{item.task}</h4>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Scheduled for {item.time}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    background: item.priority === 'High' ? 'var(--danger-color)' : item.priority === 'Medium' ? 'var(--warning-color)' : 'var(--success-color)',
+                                    boxShadow: `0 0 10px ${item.priority === 'High' ? 'var(--danger-color)' : item.priority === 'Medium' ? 'var(--warning-color)' : 'var(--success-color)'}`
+                                }}></div>
+                                <span style={{
+                                    fontSize: '0.75rem',
+                                    fontWeight: '700',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em',
+                                    color: item.priority === 'High' ? 'var(--danger-color)' : item.priority === 'Medium' ? 'var(--warning-color)' : 'var(--success-color)'
+                                }}>{item.status}</span>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );
@@ -465,7 +541,7 @@ const Dashboard = () => {
                     {['All', 'Mathematics', 'Physics', 'Biology'].map(cat => (
                         <button
                             key={cat}
-                            onClick={() => setFilterCategory(cat)}
+                            onClick={() => { playSound('click'); setFilterCategory(cat); }}
                             className={`btn ${filterCategory === cat ? 'btn-primary' : ''}`}
                             style={{ borderRadius: '10px', fontSize: '0.8rem', padding: '0.6rem 1.25rem', border: 'none', background: filterCategory === cat ? 'var(--primary-color)' : 'transparent', color: filterCategory === cat ? 'white' : 'var(--text-muted)' }}
                         >
@@ -499,7 +575,7 @@ const Dashboard = () => {
                                     </div>
                                 ))}
                             </div>
-                            <button onClick={() => setCurriculumModule(subject)} className="btn btn-outline" style={{ width: '100%', borderRadius: '12px', padding: '1rem', fontWeight: '600', borderStyle: 'dashed' }}>
+                            <button onClick={() => { playSound('click'); setCurriculumModule(subject); }} className="btn btn-outline" style={{ width: '100%', borderRadius: '12px', padding: '1rem', fontWeight: '600', borderStyle: 'dashed' }}>
                                 <FileText size={18} style={{ marginRight: '8px' }} /> EXPLORE FULL CURRICULUM
                             </button>
                         </div>
@@ -612,7 +688,6 @@ const Dashboard = () => {
         const categories = [
             { id: 'account', title: 'Account & Profile', icon: <User />, desc: 'Manage your name, email and avatar', color: '#818cf8' },
             { id: 'appearance', title: 'Appearance & Theme', icon: <Zap />, desc: 'Customize theme colors and effects', color: '#f472b6' },
-            { id: 'interface', title: 'Interface & Layout', icon: <Layout />, desc: 'Density and sidebar preferences', color: '#38bdf8' },
             { id: 'experience', title: 'Learning Experience', icon: <Activity />, desc: 'Notifications and auto-save options', color: '#34d399' },
             { id: 'learning', title: 'Learning Mode', icon: <Brain />, desc: 'Set your preferred learning style', color: '#fbbf24' }
         ];
@@ -717,10 +792,38 @@ const Dashboard = () => {
                                     </div>
                                     <div className="profile-edit-section">
                                         <div className="avatar-preview-wrapper" style={{ position: 'relative' }}>
-                                            <div className="settings-avatar-large">{user?.name?.[0]}</div>
-                                            <div style={{ position: 'absolute', bottom: -5, right: -5, background: 'var(--primary-color)', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid #111' }}>
-                                                <RefreshCw size={14} color="white" />
+                                            <div className="settings-avatar-large" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--primary-color)15', border: `2px solid var(--primary-color)30` }}>
+                                                <img
+                                                    src={`https://api.dicebear.com/7.x/notionists/svg?seed=${settingsForm.avatarSeed || 'default'}`}
+                                                    alt="Avatar"
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                />
                                             </div>
+                                            <button
+                                                onClick={() => {
+                                                    playSound('click');
+                                                    setSettingsForm({ ...settingsForm, avatarSeed: Math.random().toString(36).substring(7) });
+                                                }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    bottom: 5,
+                                                    right: 5,
+                                                    background: 'var(--primary-color)',
+                                                    width: 36,
+                                                    height: 36,
+                                                    borderRadius: '12px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    border: '4px solid #111',
+                                                    cursor: 'pointer',
+                                                    boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                                className="hover-scale"
+                                            >
+                                                <RefreshCw size={16} color="white" />
+                                            </button>
                                         </div>
                                         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                             <div className="input-group">
@@ -797,39 +900,7 @@ const Dashboard = () => {
                                 </div>
                             )}
 
-                            {/* Interface Category */}
-                            {activeSettingsCategory === 'interface' && (
-                                <div className="prompt-content">
-                                    <div className="prompt-header" style={{ justifyContent: 'center', flexDirection: 'column', textAlign: 'center' }}>
-                                        <div className="prompt-icon-bg" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', margin: '0 auto 1rem' }}><Layout size={24} /></div>
-                                        <h3 className="prompt-title">Interface & Layout</h3>
-                                    </div>
-                                    <div className="interface-section">
-                                        <div className="control-group">
-                                            <label style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-muted)' }}>View Density</label>
-                                            <div className="segmented-control">
-                                                {['Comfortable', 'Compact'].map(d => (
-                                                    <button key={d} onClick={() => {
-                                                        playSound('click');
-                                                        setSettingsForm({ ...settingsForm, viewDensity: d });
-                                                    }} className={settingsForm.viewDensity === d ? 'active' : ''}>{d}</button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="control-group">
-                                            <label style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Sidebar Position</label>
-                                            <div className="segmented-control">
-                                                {['Left', 'Right'].map(p => (
-                                                    <button key={p} onClick={() => {
-                                                        playSound('click');
-                                                        setSettingsForm({ ...settingsForm, sidebarPosition: p });
-                                                    }} className={settingsForm.sidebarPosition === p ? 'active' : ''}>{p}</button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+
 
                             {/* Experience Category */}
                             {activeSettingsCategory === 'experience' && (
@@ -925,8 +996,9 @@ const Dashboard = () => {
                             )}
                         </div>
                     </div>
-                )}
-            </div>
+                )
+                }
+            </div >
         );
     };
 
@@ -967,7 +1039,7 @@ const Dashboard = () => {
             {curriculumModule && (
                 <div className="modal-overlay animate-fade-in" style={{ zIndex: 2000 }}>
                     <div className="glass-card" style={{ width: '100%', maxWidth: '600px', padding: '3rem', position: 'relative' }}>
-                        <button onClick={() => setCurriculumModule(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={24} /></button>
+                        <button onClick={() => { playSound('click'); setCurriculumModule(null); }} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={24} /></button>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                             <div style={{ padding: '1rem', background: 'rgba(129, 140, 248,0.1)', borderRadius: '16px' }}><List size={32} color="#818cf8" /></div>
                             <div>
@@ -988,30 +1060,30 @@ const Dashboard = () => {
             )}
             <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''} ${isSidebarCollapsed ? 'collapsed' : ''}`}>
                 <div className="sidebar-header">
-                    <div className="logo-container" onClick={() => { navigate('/'); setIsMobileMenuOpen(false); }}>
+                    <div className="logo-container" onClick={() => { playSound('click'); navigate('/'); setIsMobileMenuOpen(false); }}>
                         <img src="/rabbit-logo.jpeg" alt="Logo" className="logo-icon" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
                         <span className="app-name">My True Companion</span>
                     </div>
-                    <button className="collapse-btn" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
+                    <button className="collapse-btn" onClick={() => { playSound('click'); setIsSidebarCollapsed(!isSidebarCollapsed); }}>
                         {isSidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
                     </button>
-                    <button className="mobile-close-btn" onClick={() => setIsMobileMenuOpen(false)}><X size={20} /></button>
+                    <button className="mobile-close-btn" onClick={() => { playSound('click'); setIsMobileMenuOpen(false); }}><X size={20} /></button>
                 </div>
                 <nav className="nav-section">
-                    <button className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }} title="Dashboard">
+                    <button className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => { playSound('click'); setActiveTab('dashboard'); setIsMobileMenuOpen(false); }} title="Dashboard">
                         <Layout size={18} /> <span>Dashboard</span>
                     </button>
-                    <button className={`nav-item ${activeTab === 'timetable' ? 'active' : ''}`} onClick={() => { setActiveTab('timetable'); setIsMobileMenuOpen(false); }} title="My Schedule">
+                    <button className={`nav-item ${activeTab === 'timetable' ? 'active' : ''}`} onClick={() => { playSound('click'); setActiveTab('timetable'); setIsMobileMenuOpen(false); }} title="My Schedule">
                         <Calendar size={18} /> <span>My Schedule</span>
                     </button>
-                    <button className={`nav-item ${activeTab === 'library' ? 'active' : ''}`} onClick={() => { setActiveTab('library'); setIsMobileMenuOpen(false); }} title="My Library">
+                    <button className={`nav-item ${activeTab === 'library' ? 'active' : ''}`} onClick={() => { playSound('click'); setActiveTab('library'); setIsMobileMenuOpen(false); }} title="My Library">
                         <BookOpen size={18} /> <span>My Library</span>
                     </button>
                     <div className="nav-divider"></div>
-                    <button className={`nav-item ${activeTab === 'performance' ? 'active' : ''}`} onClick={() => { setActiveTab('performance'); setIsMobileMenuOpen(false); }} title="My Progress">
+                    <button className={`nav-item ${activeTab === 'performance' ? 'active' : ''}`} onClick={() => { playSound('click'); setActiveTab('performance'); setIsMobileMenuOpen(false); }} title="My Progress">
                         <TrendingUp size={18} /> <span>My Progress</span>
                     </button>
-                    <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }} title="Settings">
+                    <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => { playSound('click'); setActiveTab('settings'); setIsMobileMenuOpen(false); }} title="Settings">
                         <Settings size={18} /> <span>Settings</span>
                     </button>
                 </nav>
@@ -1020,15 +1092,64 @@ const Dashboard = () => {
             <main className="main-content">
                 <header className="header-bar">
                     <div className="header-left">
-                        <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(true)}>
+                        <button className="mobile-menu-toggle" onClick={() => { playSound('click'); setIsMobileMenuOpen(true); }}>
                             <Menu size={24} />
                         </button>
                         <div className="welcome-text">
-                            <h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
-                            <p>Hey there, {user?.name}! 👋</p>
+                            <div
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', position: 'relative', width: 'fit-content' }}
+                                onClick={() => { playSound('click'); setIsNavDropdownOpen(!isNavDropdownOpen); }}
+                                className="section-title-trigger"
+                            >
+                                <h1 style={{ margin: 0 }}>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
+                                <ChevronDown
+                                    size={24}
+                                    style={{
+                                        color: 'var(--primary-color)',
+                                        transform: isNavDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                                        transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                                        marginTop: '4px'
+                                    }}
+                                />
+
+                                {isNavDropdownOpen && (
+                                    <div className="nav-dropdown animate-scale-in">
+                                        {[
+                                            { id: 'dashboard', label: 'Dashboard', icon: <Layout size={18} /> },
+                                            { id: 'timetable', label: 'My Schedule', icon: <Calendar size={18} /> },
+                                            { id: 'library', label: 'My Library', icon: <BookOpen size={18} /> },
+                                            { id: 'performance', label: 'My Progress', icon: <TrendingUp size={18} /> },
+                                            { id: 'settings', label: 'Settings', icon: <Settings size={18} /> }
+                                        ].map(tab => (
+                                            <div
+                                                key={tab.id}
+                                                className={`dropdown-item ${activeTab === tab.id ? 'active' : ''}`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    playSound('click');
+                                                    setActiveTab(tab.id);
+                                                    setIsNavDropdownOpen(false);
+                                                }}
+                                            >
+                                                <div className="dropdown-icon-wrapper">{tab.icon}</div>
+                                                <span>{tab.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <p style={{ marginTop: '0.25rem' }}>Hey there, {user?.name}! 👋</p>
                         </div>
                     </div>
-                    <div className="user-profile"><div className="avatar" onClick={() => setActiveTab('settings')}>{user?.name?.[0]}</div></div>
+                    <div className="user-profile">
+                        <div className="avatar" onClick={() => { playSound('click'); setActiveTab('settings'); }} style={{ overflow: 'hidden', padding: 0 }}>
+                            <img
+                                src={`https://api.dicebear.com/7.x/notionists/svg?seed=${settingsForm.avatarSeed || 'default'}`}
+                                alt="Profile"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                        </div>
+                    </div>
                 </header>
                 {activeTab === 'dashboard' && renderOverview()}
                 {activeTab === 'timetable' && renderSchedule()}
