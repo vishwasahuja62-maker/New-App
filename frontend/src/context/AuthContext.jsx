@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [onboardingStep, setOnboardingStep] = useState(0);
+  const [onboardingStep, setInternalOnboardingStep] = useState(0);
   const [userProfile, setUserProfile] = useState({
     iq: 0,
     eq: 0,
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
           setUser(res.data);
           setIsAuthenticated(true);
           if (res.data.onboardingStep !== undefined) {
-            setOnboardingStep(res.data.onboardingStep);
+            setInternalOnboardingStep(res.data.onboardingStep ?? 0);
           }
         }
       } catch (err) {
@@ -66,10 +66,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', res.data.token);
       setUser(res.data);
       setIsAuthenticated(true);
-      if (res.data.onboardingStep !== undefined) {
-        setOnboardingStep(res.data.onboardingStep);
-      }
-      return { success: true };
+      const step = res.data.onboardingStep ?? 0;
+      setInternalOnboardingStep(step);
+      return { success: true, onboardingStep: step };
     } catch (err) {
       return {
         success: false,
@@ -84,8 +83,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', res.data.token);
       setUser(res.data);
       setIsAuthenticated(true);
-      setOnboardingStep(0);
-      return { success: true };
+      setInternalOnboardingStep(0);
+      return { success: true, onboardingStep: 0 };
     } catch (err) {
       return {
         success: false,
@@ -98,15 +97,27 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setUser(null);
     setIsAuthenticated(false);
-    setOnboardingStep(0);
+    setInternalOnboardingStep(0);
   };
 
   const updateProfile = (data) => {
     setUserProfile((prev) => ({ ...prev, ...data }));
   };
 
-  const completeOnboarding = () => {
-    setOnboardingStep(4);
+  const setOnboardingStep = async (step, persist = false) => {
+    setInternalOnboardingStep(step);
+    if (persist && isAuthenticated) {
+      try {
+        await axios.put(`${API_URL}/onboarding-step`, { onboardingStep: step });
+        setUser(prev => prev ? ({ ...prev, onboardingStep: step }) : prev);
+      } catch (err) {
+        console.error('Failed to persist onboarding step', err);
+      }
+    }
+  };
+
+  const completeOnboarding = async () => {
+    await setOnboardingStep(4, true);
   };
 
   return (

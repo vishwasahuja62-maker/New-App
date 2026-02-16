@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import {
     BookOpen, Calendar, Activity, Zap, PlayCircle, LogOut,
-    Bell, Search, GraduationCap, Layout, Settings, User, ExternalLink, Filter, Save, CheckCircle, Info, TrendingUp, Clock, Target, FileText, HelpCircle, Globe, X, Layers, Cpu, Radio, ChevronRight, ChevronLeft, Bookmark, Shield, Sliders, Award, Brain, RefreshCw, List, Menu
+    Bell, Search, GraduationCap, Layout, Settings, User, ExternalLink, Filter, Save, CheckCircle, Info, TrendingUp, Clock, Target, FileText, HelpCircle, Globe, X, Layers, Cpu, Radio, ChevronRight, ChevronLeft, ArrowLeft, Bookmark, Shield, Sliders, Award, Brain, RefreshCw, List, Menu
 } from 'lucide-react';
 import libraryData from '../libraryData.json';
 import '../dashboard.css';
@@ -86,6 +86,111 @@ const CognitiveMonitor = () => {
                 </div>
             </div>
         </>
+    );
+};
+
+const SimulationSandbox = ({ topic, userProfile, setIsSimulating, setSelectionMode, learningContent, selectionMode }) => {
+    useEffect(() => {
+        if (selectionMode) {
+            const panel = document.getElementById('sandbox-main-panel');
+            if (panel) panel.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [selectionMode]);
+
+    return (
+        <div className="modal-overlay animate-fade-in" style={{ background: '#020617', padding: 0 }}>
+            <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '1rem 2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(12px)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        <div
+                            onClick={() => { setIsSimulating(false); setSelectionMode(null); }}
+                            style={{ width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', cursor: 'pointer' }}
+                        >
+                            <img src="/rabbit-logo.jpeg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </div>
+                        <div>
+                            <h2 style={{ fontSize: '1.2rem', fontWeight: '700', letterSpacing: '-0.01em' }}>{topic} <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: '400' }}>// RESOURCE HUB</span></h2>
+                        </div>
+                    </div>
+                    <button onClick={() => { setIsSimulating(false); setSelectionMode(null); }} className="glass hover-card" style={{ color: '#f87171', border: '1px solid rgba(248, 113, 113, 0.2)', padding: '0.6rem', borderRadius: '10px', cursor: 'pointer', display: 'flex' }}><X size={18} /></button>
+                </div>
+
+                <div className="sandbox-layout" style={{ flex: 1, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div className="simulation-panel" style={{ background: '#0f172a', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div>
+                            <h4 style={{ color: '#94a3b8', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '1.5rem' }}>Dynamic Objectives</h4>
+                            {learningContent?.objectives.map((obj, i) => (
+                                <div key={i} className="glass" style={{ padding: '0.75rem 1rem', borderRadius: '12px', marginBottom: '0.75rem', fontSize: '0.8rem', display: 'flex', gap: '0.5rem' }}>
+                                    <CheckCircle size={14} color="#34d399" /> {obj}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="card" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <h4 style={{ color: '#94a3b8', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '1rem' }}>Cognitive Metrics</h4>
+                            {learningContent?.metrics.map(m => (
+                                <div key={m.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{m.label}</span>
+                                    <span style={{ fontSize: '0.75rem', color: '#a78bfa', fontWeight: 'bold' }}>{m.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mobile-only" style={{ marginTop: '2rem', width: '100%' }}>
+                            <button
+                                onClick={() => document.getElementById('sandbox-main-panel')?.scrollIntoView({ behavior: 'smooth' })}
+                                className="btn btn-primary"
+                                style={{ width: '100%', padding: '1rem', borderRadius: '12px', fontWeight: '700' }}
+                            >
+                                START EXPLORING &rarr;
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="sandbox-main-panel" className="simulation-panel sandbox-content-panel" style={{ background: '#020617', padding: '2rem 4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+                        {!selectionMode ? (
+                            <div style={{ textAlign: 'center', maxWidth: '800px', animation: 'fadeIn 0.5s ease', marginTop: 'auto', marginBottom: 'auto' }}>
+                                <div style={{ width: '100px', height: '100px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '50%', margin: '0 auto 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Layers size={45} color="#a78bfa" />
+                                </div>
+                                <h1 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '1.5rem' }}>{topic} Resources</h1>
+                                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '3rem', lineHeight: '1.6' }}>Choose your interactive pathway. My True Companion has scanned the top resources specifically for <strong>{topic}</strong>.</p>
+                                <div className="sandbox-options-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', width: '100%' }}>
+                                    <button onClick={() => setSelectionMode('sim')} className="glass hover-card" style={{ padding: '2rem', borderRadius: '24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+                                        <PlayCircle size={32} color="#a78bfa" style={{ marginBottom: '1rem' }} />
+                                        <h4 style={{ fontSize: '1rem', color: 'white' }}>LAUNCH ENGINE</h4>
+                                    </button>
+                                    <button onClick={() => setSelectionMode('blueprint')} className="glass hover-card" style={{ padding: '2rem', borderRadius: '24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+                                        <FileText size={32} color="#34d399" style={{ marginBottom: '1rem' }} />
+                                        <h4 style={{ fontSize: '1rem', color: 'white' }}>VIEW BLUEPRINT</h4>
+                                    </button>
+                                    <button onClick={() => setSelectionMode('resources')} className="glass hover-card" style={{ padding: '2rem', borderRadius: '24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+                                        <Bookmark size={32} color="#fcd34d" style={{ marginBottom: '1rem' }} />
+                                        <h4 style={{ fontSize: '1rem', color: 'white' }}>KEY RESOURCES</h4>
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div style={{ width: '100%', maxWidth: '800px', animation: 'fadeInRight 0.4s ease' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+                                    <button onClick={() => setSelectionMode(null)} className="glass hover-card" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer' }}><ArrowLeft size={20} /></button>
+                                    <h2 style={{ fontSize: '1.5rem', margin: 0 }}>{selectionMode === 'sim' ? 'Top Simulations' : selectionMode === 'blueprint' ? 'Academic Blueprints' : 'Key Resources'}</h2>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '3rem' }}>
+                                    {(selectionMode === 'sim' ? learningContent?.simulations : selectionMode === 'blueprint' ? learningContent?.blueprints : learningContent?.keyResources).map((res, i) => (
+                                        <a key={i} href={res.url} target="_blank" rel="noreferrer" className="glass hover-card" style={{ padding: '1.5rem 2rem', borderRadius: '24px', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                                                <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a78bfa' }}>{res.icon}</div>
+                                                <div><h4 style={{ color: 'white', marginBottom: '0.25rem' }}>{res.title}</h4><p style={{ color: '#64748b', fontSize: '0.8rem' }}>Provided by {res.provider}</p></div>
+                                            </div>
+                                            <ChevronRight size={20} color="#64748b" />
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div >
     );
 };
 
@@ -210,90 +315,6 @@ const Dashboard = () => {
                         </div>
                     ))}
                 </div>
-                <button onClick={() => { setTopic(curriculumModule.title); setActiveTab('dashboard'); setCurriculumModule(null); }} className="btn btn-primary" style={{ width: '100%', marginTop: '2.5rem', padding: '1.2rem' }}>Launch Full Learning Pathway</button>
-            </div>
-        </div>
-    );
-
-    const SimulationSandbox = () => (
-        <div className="modal-overlay animate-fade-in" style={{ background: '#020617', padding: 0 }}>
-            <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ padding: '1.5rem 3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.5)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                        <div className="logo-icon">C</div>
-                        <div>
-                            <h2 style={{ fontSize: '1.4rem', fontWeight: '800' }}>{topic} <span style={{ color: '#a78bfa', fontSize: '0.9rem', letterSpacing: '2px' }}>// {userProfile.learningMode?.toUpperCase()} MODE</span></h2>
-                            <p style={{ fontSize: '0.7rem', color: '#94a3b8' }}>EST. DURATION: 45 MINS</p>
-                        </div>
-                    </div>
-                    <button onClick={() => { setIsSimulating(false); setSelectionMode(null); }} style={{ background: 'rgba(248, 113, 113, 0.1)', color: '#f87171', border: '1px solid rgba(248, 113, 113, 0.2)', padding: '0.75rem', borderRadius: '12px', cursor: 'pointer' }}><X size={20} /></button>
-                </div>
-
-                <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'minmax(320px, 350px) 1fr', gap: '1px', background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                    <div className="simulation-panel" style={{ background: '#0f172a', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                        <div>
-                            <h4 style={{ color: '#94a3b8', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '1.5rem' }}>Dynamic Objectives</h4>
-                            {learningContent?.objectives.map((obj, i) => (
-                                <div key={i} className="glass" style={{ padding: '0.75rem 1rem', borderRadius: '12px', marginBottom: '0.75rem', fontSize: '0.8rem', display: 'flex', gap: '0.5rem' }}>
-                                    <CheckCircle size={14} color="#34d399" /> {obj}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="card" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <h4 style={{ color: '#94a3b8', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '1rem' }}>Cognitive Metrics</h4>
-                            {learningContent?.metrics.map(m => (
-                                <div key={m.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{m.label}</span>
-                                    <span style={{ fontSize: '0.75rem', color: '#a78bfa', fontWeight: 'bold' }}>{m.value}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="simulation-panel" style={{ background: '#020617', padding: '2rem 4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
-                        {!selectionMode ? (
-                            <div style={{ textAlign: 'center', maxWidth: '800px', animation: 'fadeIn 0.5s ease', marginTop: 'auto', marginBottom: 'auto' }}>
-                                <div style={{ width: '100px', height: '100px', background: 'rgba(99,102,241,0.1)', borderRadius: '50%', margin: '0 auto 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Cpu size={40} color="#818cf8" />
-                                </div>
-                                <h1 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '1.5rem' }}>{topic} Sandbox</h1>
-                                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '3rem', lineHeight: '1.6' }}>Choose your interactive pathway. My True Companion has scanned the top resources specifically for <strong>{topic}</strong>.</p>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', width: '100%' }}>
-                                    <button onClick={() => setSelectionMode('sim')} className="glass hover-card" style={{ padding: '2rem', borderRadius: '24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
-                                        <PlayCircle size={32} color="#a78bfa" style={{ marginBottom: '1rem' }} />
-                                        <h4 style={{ fontSize: '1rem', color: 'white' }}>LAUNCH ENGINE</h4>
-                                    </button>
-                                    <button onClick={() => setSelectionMode('blueprint')} className="glass hover-card" style={{ padding: '2rem', borderRadius: '24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
-                                        <FileText size={32} color="#34d399" style={{ marginBottom: '1rem' }} />
-                                        <h4 style={{ fontSize: '1rem', color: 'white' }}>VIEW BLUEPRINT</h4>
-                                    </button>
-                                    <button onClick={() => setSelectionMode('resources')} className="glass hover-card" style={{ padding: '2rem', borderRadius: '24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
-                                        <Bookmark size={32} color="#fcd34d" style={{ marginBottom: '1rem' }} />
-                                        <h4 style={{ fontSize: '1rem', color: 'white' }}>KEY RESOURCES</h4>
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div style={{ width: '100%', maxWidth: '800px', animation: 'fadeInRight 0.4s ease' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                                    <button onClick={() => setSelectionMode(null)} style={{ background: 'transparent', border: 'none', color: '#a78bfa', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '1rem' }}>&larr; Back to Selection</button>
-                                    <h2 style={{ fontSize: '1.5rem' }}>{selectionMode === 'sim' ? 'Top Simulations' : selectionMode === 'blueprint' ? 'Academic Blueprints' : 'Key Resources'}</h2>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '3rem' }}>
-                                    {(selectionMode === 'sim' ? learningContent?.simulations : selectionMode === 'blueprint' ? learningContent?.blueprints : learningContent?.keyResources).map((res, i) => (
-                                        <a key={i} href={res.url} target="_blank" rel="noreferrer" className="glass hover-card" style={{ padding: '1.5rem 2rem', borderRadius: '24px', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                                                <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a78bfa' }}>{res.icon}</div>
-                                                <div><h4 style={{ color: 'white', marginBottom: '0.25rem' }}>{res.title}</h4><p style={{ color: '#64748b', fontSize: '0.8rem' }}>Provided by {res.provider}</p></div>
-                                            </div>
-                                            <ChevronRight size={20} color="#64748b" />
-                                        </a>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
             </div>
         </div>
     );
@@ -322,7 +343,7 @@ const Dashboard = () => {
                         />
                     </div>
                     <button type="submit" className="btn btn-primary" style={{ padding: '0 1.5rem', borderRadius: '12px' }}>
-                        {isLoadingContent ? <RefreshCw className="animate-spin" size={18} /> : 'Generate Insights'}
+                        {isLoadingContent ? 'Generating...' : 'Generate Insights'}
                     </button>
                 </form>
                 {learningContent && (
@@ -333,12 +354,9 @@ const Dashboard = () => {
                                 <span className="badge active">{learningContent.mode?.toUpperCase()} ANALYSIS</span>
                             </div>
                             <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2.5rem', fontSize: '1.05rem' }}>{learningContent.summary}</p>
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button onClick={() => setIsSimulating(true)} className="btn btn-primary" style={{ flex: 1, padding: '1.25rem', borderRadius: '14px', fontWeight: '600' }}>
-                                    <PlayCircle size={20} style={{ marginRight: '8px' }} /> START INTERACTIVE SESSION
-                                </button>
-                                <button className="btn btn-outline" style={{ padding: '0 1.25rem', borderRadius: '14px' }}>
-                                    <Bookmark size={20} />
+                            <div style={{ display: 'flex' }}>
+                                <button onClick={() => setIsSimulating(true)} className="btn btn-primary" style={{ padding: '0.8rem 1.8rem', borderRadius: '12px', fontWeight: '600', fontSize: '0.95rem' }}>
+                                    <PlayCircle size={18} style={{ marginRight: '8px' }} /> START INTERACTIVE SESSION
                                 </button>
                             </div>
                         </div>
@@ -562,7 +580,16 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard-container">
-            {isSimulating && <SimulationSandbox />}
+            {isSimulating && (
+                <SimulationSandbox
+                    topic={topic}
+                    userProfile={userProfile}
+                    setIsSimulating={setIsSimulating}
+                    setSelectionMode={setSelectionMode}
+                    learningContent={learningContent}
+                    selectionMode={selectionMode}
+                />
+            )}
             {curriculumModule && <CurriculumModal />}
             <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''} ${isSidebarCollapsed ? 'collapsed' : ''}`}>
                 <div className="sidebar-header">

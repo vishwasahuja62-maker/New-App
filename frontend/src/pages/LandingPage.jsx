@@ -70,7 +70,7 @@ const StepItem = ({ step, title, desc, icon: Icon, idx }) => (
 
 const LandingPage = () => {
     const navigate = useNavigate();
-    const { login, register, isAuthenticated, logout } = useAuth();
+    const { login, register, isAuthenticated, logout, onboardingStep } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
     const [error, setError] = useState('');
@@ -95,7 +95,16 @@ const LandingPage = () => {
 
         if (result.success) {
             setIsModalOpen(false);
-            navigate('/onboarding');
+            if (isSignUp) {
+                sessionStorage.setItem('onboardingIsNewUser', 'true');
+            } else {
+                sessionStorage.removeItem('onboardingIsNewUser');
+            }
+            if (result.onboardingStep >= 4) {
+                navigate('/dashboard');
+            } else {
+                navigate('/onboarding');
+            }
         } else {
             setError(result.message);
         }
@@ -178,10 +187,17 @@ const LandingPage = () => {
                         className="hero-buttons"
                     >
                         <button
-                            onClick={() => isAuthenticated ? navigate('/onboarding') : openModal(true)}
+                            onClick={() => {
+                                if (isAuthenticated) {
+                                    if (onboardingStep >= 4) navigate('/dashboard');
+                                    else navigate('/onboarding');
+                                } else {
+                                    openModal(true);
+                                }
+                            }}
                             className="btn btn-lg btn-primary"
                         >
-                            {isAuthenticated ? "Continue Session" : "Start Assessment"} <ArrowRight size={20} />
+                            {isAuthenticated ? (onboardingStep >= 4 ? "Enter Dashboard" : "Continue Session") : "Start Assessment"} <ArrowRight size={20} />
                         </button>
                         <button className="btn btn-lg btn-outline">
                             View Demo

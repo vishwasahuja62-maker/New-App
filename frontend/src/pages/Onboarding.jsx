@@ -90,8 +90,15 @@ const ParentContactForm = ({ onSubmit }) => {
 };
 
 const Onboarding = () => {
-    const { user, completeOnboarding, updateProfile } = useAuth();
+    const { user, onboardingStep, completeOnboarding, updateProfile } = useAuth();
     const navigate = useNavigate();
+    const isNewUser = sessionStorage.getItem('onboardingIsNewUser') === 'true';
+
+    useEffect(() => {
+        if (onboardingStep >= 4) {
+            navigate('/dashboard');
+        }
+    }, [onboardingStep, navigate]);
 
     const [phase, setPhase] = useState(1);
     const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -127,9 +134,9 @@ const Onboarding = () => {
         }
     };
 
-    const handeContactSubmit = (contact) => {
+    const handeContactSubmit = async (contact) => {
         updateProfile({ parentContact: contact });
-        completeOnboarding();
+        await completeOnboarding();
         navigate('/dashboard');
     };
 
@@ -143,9 +150,19 @@ const Onboarding = () => {
 
             <div className="onboarding-inner">
                 <header className="onboarding-header">
-                    <div className="brand-badge">
-                        <Sparkles size={16} />
-                        <span>My True Companion AI</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                        <div className="brand-badge">
+                            <Sparkles size={16} />
+                            <span>My True Companion AI</span>
+                        </div>
+                        {!isNewUser && (
+                            <button
+                                onClick={() => completeOnboarding()}
+                                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                                Skip Assessment
+                            </button>
+                        )}
                     </div>
                     <h1>
                         {phase === 1 ? "Cognitive Analysis" : phase === 2 ? "Lifestyle Calibration" : "Safety Protocol"}
