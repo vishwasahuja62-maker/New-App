@@ -224,6 +224,7 @@ const Dashboard = () => {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [activeSettingsCategory, setActiveSettingsCategory] = useState(null);
     const [isNavDropdownOpen, setIsNavDropdownOpen] = useState(false);
+    const [isLibraryDropdownOpen, setIsLibraryDropdownOpen] = useState(false);
 
     // Detailed Schedule State
     const [schedule, setSchedule] = useState([
@@ -528,7 +529,7 @@ const Dashboard = () => {
     );
 
     const renderLibrary = () => (
-        <div className="view-container animate-fade-in">
+        <div className="view-container animate-fade-in" onClick={() => isLibraryDropdownOpen && setIsLibraryDropdownOpen(false)}>
             <div className="view-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                     <BookOpen size={40} className="icon-purple" />
@@ -537,17 +538,53 @@ const Dashboard = () => {
                         <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Books, videos, and practice materials.</p>
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.75rem', background: 'rgba(0,0,0,0.2)', padding: '0.4rem', borderRadius: '14px', border: '1px solid var(--glass-border)' }}>
-                    {['All', 'Mathematics', 'Physics', 'Biology'].map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => { playSound('click'); setFilterCategory(cat); }}
-                            className={`btn ${filterCategory === cat ? 'btn-primary' : ''}`}
-                            style={{ borderRadius: '10px', fontSize: '0.8rem', padding: '0.6rem 1.25rem', border: 'none', background: filterCategory === cat ? 'var(--primary-color)' : 'transparent', color: filterCategory === cat ? 'white' : 'var(--text-muted)' }}
-                        >
-                            {cat}
-                        </button>
-                    ))}
+                <div style={{ position: 'relative' }}>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); playSound('click'); setIsLibraryDropdownOpen(!isLibraryDropdownOpen); }}
+                        className="btn glass hover-card"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: '0.75rem 1.5rem',
+                            borderRadius: '16px',
+                            border: '1px solid var(--glass-border)',
+                            color: 'white',
+                            minWidth: '200px',
+                            justifyContent: 'space-between'
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Filter size={18} color="var(--primary-color)" />
+                            <span style={{ fontWeight: '600' }}>{filterCategory}</span>
+                        </div>
+                        <ChevronDown size={18} style={{ transform: isLibraryDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }} />
+                    </button>
+
+                    {isLibraryDropdownOpen && (
+                        <div className="nav-dropdown animate-scale-in" style={{
+                            top: 'calc(100% + 10px)',
+                            right: 0,
+                            minWidth: '220px',
+                            padding: '0.5rem',
+                            display: 'block'
+                        }}>
+                            {['All', 'Mathematics', 'Physics', 'Biology', 'Chemistry'].map(cat => (
+                                <div
+                                    key={cat}
+                                    className={`dropdown-item ${filterCategory === cat ? 'active' : ''}`}
+                                    onClick={() => {
+                                        playSound('click');
+                                        setFilterCategory(cat);
+                                        setIsLibraryDropdownOpen(false);
+                                    }}
+                                >
+                                    <span>{cat}</span>
+                                    {filterCategory === cat && <CheckCircle size={14} color="var(--primary-color)" />}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="library-grid">
@@ -556,23 +593,41 @@ const Dashboard = () => {
                         <div style={{ padding: '2rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(135deg, rgba(129, 140, 248, 0.1) 0%, transparent 100%)' }}>
                             <div>
                                 <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.25rem' }}>{subject.title}</h3>
-                                <div className="badge active" style={{ fontSize: '0.65rem' }}>12 LESSONS • 4.5 HRS</div>
+                                <div className="badge active" style={{ fontSize: '0.65rem' }}>{subject.videos.length} VIDEOS • {subject.videos.length * 20} MINS</div>
                             </div>
                             <div className="stat-icon" style={{ borderRadius: '12px' }}><Layers size={20} /></div>
                         </div>
                         <div style={{ padding: '1.5rem' }}>
                             <div style={{ marginBottom: '1.5rem' }}>
                                 {subject.videos.slice(0, 3).map((vid, idx) => (
-                                    <div key={idx} className="nav-item" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '1rem', marginBottom: '0.75rem', borderRadius: '16px' }}>
+                                    <a
+                                        key={idx}
+                                        href={vid.url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="nav-item"
+                                        style={{
+                                            background: 'rgba(255,255,255,0.02)',
+                                            border: '1px solid transparent',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            padding: '1rem',
+                                            marginBottom: '0.75rem',
+                                            borderRadius: '16px',
+                                            textDecoration: 'none',
+                                            color: 'white'
+                                        }}
+                                    >
                                         <div style={{ width: '32px', height: '32px', background: 'rgba(129, 140, 248, 0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '1rem' }}>
                                             <PlayCircle size={16} color="var(--primary-color)" />
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <h5 style={{ fontSize: '0.9rem', fontWeight: '600' }}>{vid.title}</h5>
-                                            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Foundational Theory</p>
+                                            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Learning Resource</p>
                                         </div>
-                                        <ChevronRight size={16} color="var(--text-muted)" />
-                                    </div>
+                                        <ExternalLink size={14} color="var(--text-muted)" />
+                                    </a>
                                 ))}
                             </div>
                             <button onClick={() => { playSound('click'); setCurriculumModule(subject); }} className="btn btn-outline" style={{ width: '100%', borderRadius: '12px', padding: '1rem', fontWeight: '600', borderStyle: 'dashed' }}>
@@ -760,7 +815,8 @@ const Dashboard = () => {
                                         dynamicBackground: false,
                                         soundEffects: false,
                                         autoSave: true,
-                                        themeColor: '#818cf8'
+                                        themeColor: '#818cf8',
+                                        avatarSeed: Math.random().toString(36).substring(7)
                                     };
                                     setSettingsForm(defaults);
                                     localStorage.setItem('dashboard-settings', JSON.stringify(defaults));
@@ -792,7 +848,17 @@ const Dashboard = () => {
                                     </div>
                                     <div className="profile-edit-section">
                                         <div className="avatar-preview-wrapper" style={{ position: 'relative' }}>
-                                            <div className="settings-avatar-large" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--primary-color)15', border: `2px solid var(--primary-color)30` }}>
+                                            <div className="settings-avatar-large" style={{
+                                                overflow: 'hidden',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                background: 'var(--primary-color)15',
+                                                border: `2px solid var(--primary-color)40`,
+                                                borderRadius: '24px',
+                                                width: '100px',
+                                                height: '100px'
+                                            }}>
                                                 <img
                                                     src={`https://api.dicebear.com/7.x/notionists/svg?seed=${settingsForm.avatarSeed || 'default'}`}
                                                     alt="Avatar"
@@ -806,19 +872,20 @@ const Dashboard = () => {
                                                 }}
                                                 style={{
                                                     position: 'absolute',
-                                                    bottom: 5,
-                                                    right: 5,
+                                                    bottom: -2,
+                                                    right: -2,
                                                     background: 'var(--primary-color)',
-                                                    width: 36,
-                                                    height: 36,
-                                                    borderRadius: '12px',
+                                                    width: 32,
+                                                    height: 32,
+                                                    borderRadius: '50%',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     border: '4px solid #111',
                                                     cursor: 'pointer',
-                                                    boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-                                                    transition: 'all 0.3s ease'
+                                                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                                                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                                    zIndex: 10
                                                 }}
                                                 className="hover-scale"
                                             >
@@ -996,9 +1063,8 @@ const Dashboard = () => {
                             )}
                         </div>
                     </div>
-                )
-                }
-            </div >
+                )}
+            </div>
         );
     };
 
@@ -1048,11 +1114,32 @@ const Dashboard = () => {
                             </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {['1. Introduction & History', '2. Core Concepts', '3. Practice Problems', '4. Connecting the Dots', '5. Hands-on Projects'].map((step, idx) => (
-                                <div key={idx} className="glass" style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#818cf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: '800' }}>{idx + 1}</div>
-                                    <span style={{ fontSize: '0.95rem' }}>{step}</span>
-                                </div>
+                            {curriculumModule.videos.map((vid, idx) => (
+                                <a
+                                    key={idx}
+                                    href={vid.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="glass"
+                                    style={{
+                                        padding: '1.25rem',
+                                        borderRadius: '16px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '1.25rem',
+                                        textDecoration: 'none',
+                                        color: 'white'
+                                    }}
+                                >
+                                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <PlayCircle size={18} color="white" />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.2rem' }}>{vid.title}</h4>
+                                        <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Advanced Course Module • Module {idx + 1}</p>
+                                    </div>
+                                    <ExternalLink size={18} color="#64748b" />
+                                </a>
                             ))}
                         </div>
                     </div>
@@ -1142,7 +1229,7 @@ const Dashboard = () => {
                         </div>
                     </div>
                     <div className="user-profile">
-                        <div className="avatar" onClick={() => { playSound('click'); setActiveTab('settings'); }} style={{ overflow: 'hidden', padding: 0 }}>
+                        <div className="avatar" onClick={() => { playSound('click'); setActiveTab('settings'); }} style={{ overflow: 'hidden', padding: 0, borderRadius: '50%' }}>
                             <img
                                 src={`https://api.dicebear.com/7.x/notionists/svg?seed=${settingsForm.avatarSeed || 'default'}`}
                                 alt="Profile"

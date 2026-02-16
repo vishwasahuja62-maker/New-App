@@ -355,7 +355,7 @@ html {
 .avatar {
     width: 48px;
     height: 48px;
-    border-radius: 12px;
+    border-radius: 50%;
     background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
     display: flex;
     align-items: center;
