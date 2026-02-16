@@ -6,8 +6,24 @@ import {
 } from 'recharts';
 import {
     BookOpen, Calendar, Activity, Zap, PlayCircle, LogOut,
-    Bell, Search, GraduationCap, Layout, Settings, User, ExternalLink, Filter, Save, CheckCircle, Info, TrendingUp, Clock, Target, FileText, HelpCircle, Globe, X, Layers, Cpu, Radio, ChevronRight, ChevronLeft, ArrowLeft, Bookmark, Shield, Sliders, Award, Brain, RefreshCw, List, Menu, ChevronDown
+    Bell, Search, GraduationCap, Layout, Settings, User, ExternalLink, Filter, Save, CheckCircle, Info, TrendingUp, Clock, Target, FileText, HelpCircle, Globe, X, Layers, Cpu, Radio, ChevronRight, ChevronLeft, ArrowLeft, Bookmark, Shield, Sliders, Award, Brain, RefreshCw, List, Menu, ChevronDown, Edit, GripVertical
 } from 'lucide-react';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import libraryData from '../libraryData.json';
 import '../dashboard.css';
 import '../settings-mobile.css';
@@ -208,6 +224,75 @@ const SimulationSandbox = ({ topic, userProfile, setIsSimulating, setSelectionMo
     );
 };
 
+const SortableScheduleItem = ({ item, onEdit, playSound }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: item.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 2 : 1,
+        opacity: isDragging ? 0.5 : 1,
+        cursor: isDragging ? 'grabbing' : 'auto'
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="card schedule-card hover-card"
+        >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div
+                        {...attributes}
+                        {...listeners}
+                        style={{ cursor: 'grab', display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}
+                        className="drag-handle"
+                    >
+                        <GripVertical size={18} />
+                    </div>
+                    <div className="badge active" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>{item.type}</div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                        onClick={() => { playSound('click'); onEdit(item); }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                        className="hover-scale"
+                    >
+                        <Edit size={16} />
+                    </button>
+                    <Clock size={18} style={{ color: 'var(--text-muted)' }} />
+                </div>
+            </div>
+            <h4 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>{item.task}</h4>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Scheduled for {item.time}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: item.priority === 'High' ? 'var(--danger-color)' : item.priority === 'Medium' ? 'var(--warning-color)' : 'var(--success-color)',
+                    boxShadow: `0 0 10px ${item.priority === 'High' ? 'var(--danger-color)' : item.priority === 'Medium' ? 'var(--warning-color)' : 'var(--success-color)'}`
+                }}></div>
+                <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    color: item.priority === 'High' ? 'var(--danger-color)' : item.priority === 'Medium' ? 'var(--warning-color)' : 'var(--success-color)'
+                }}>{item.status}</span>
+            </div>
+        </div>
+    );
+};
+
 const Dashboard = () => {
     const { user, userProfile, logout, updateProfile, performanceMetrics, updatePerformance } = useAuth();
     const navigate = useNavigate();
@@ -233,6 +318,41 @@ const Dashboard = () => {
         { id: 3, time: '02:00 PM', task: 'Cognitive Break', priority: 'Low', status: 'Syncing', type: 'Rest' },
         { id: 4, time: '04:00 PM', task: 'AI Lab Session', priority: 'High', status: 'Ready', type: 'Practical' }
     ]);
+    const [isEditingSchedule, setIsEditingSchedule] = useState(null);
+    const [tempScheduleItem, setTempScheduleItem] = useState(null);
+    const [scheduleError, setScheduleError] = useState('');
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+
+        if (active.id !== over.id) {
+            setSchedule((items) => {
+                const oldIndex = items.findIndex((i) => i.id === active.id);
+                const newIndex = items.findIndex((i) => i.id === over.id);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    };
+
+    const handleSaveScheduleEdit = () => {
+        const conflict = schedule.find(item => item.time === tempScheduleItem.time && item.id !== tempScheduleItem.id);
+        if (conflict) {
+            setScheduleError(`Time conflict: ${conflict.task} is already scheduled for ${tempScheduleItem.time}`);
+            return;
+        }
+
+        setSchedule(schedule.map(item => item.id === tempScheduleItem.id ? tempScheduleItem : item));
+        setIsEditingSchedule(null);
+        setTempScheduleItem(null);
+        setScheduleError('');
+    };
 
     const [settingsForm, setSettingsForm] = useState(() => {
         const defaults = {
@@ -497,32 +617,25 @@ const Dashboard = () => {
                         <p style={{ color: 'var(--text-muted)' }}>Analyzing focus metrics and subject weights</p>
                     </div>
                 ) : (
-                    schedule.map((item) => (
-                        <div key={item.id} className="card schedule-card hover-card">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                                <div className="badge active" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>{item.type}</div>
-                                <Clock size={18} style={{ color: 'var(--text-muted)' }} />
-                            </div>
-                            <h4 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>{item.task}</h4>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Scheduled for {item.time}</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <div style={{
-                                    width: '8px',
-                                    height: '8px',
-                                    borderRadius: '50%',
-                                    background: item.priority === 'High' ? 'var(--danger-color)' : item.priority === 'Medium' ? 'var(--warning-color)' : 'var(--success-color)',
-                                    boxShadow: `0 0 10px ${item.priority === 'High' ? 'var(--danger-color)' : item.priority === 'Medium' ? 'var(--warning-color)' : 'var(--success-color)'}`
-                                }}></div>
-                                <span style={{
-                                    fontSize: '0.75rem',
-                                    fontWeight: '700',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.05em',
-                                    color: item.priority === 'High' ? 'var(--danger-color)' : item.priority === 'Medium' ? 'var(--warning-color)' : 'var(--success-color)'
-                                }}>{item.status}</span>
-                            </div>
-                        </div>
-                    ))
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext
+                            items={schedule.map(i => i.id)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {schedule.map((item) => (
+                                <SortableScheduleItem
+                                    key={item.id}
+                                    item={item}
+                                    onEdit={(it) => { setTempScheduleItem({ ...it }); setIsEditingSchedule(true); }}
+                                    playSound={playSound}
+                                />
+                            ))}
+                        </SortableContext>
+                    </DndContext>
                 )}
             </div>
         </div>
@@ -630,7 +743,7 @@ const Dashboard = () => {
                                     </a>
                                 ))}
                             </div>
-                            <button onClick={() => { playSound('click'); setCurriculumModule(subject); }} className="btn btn-outline" style={{ width: '100%', borderRadius: '12px', padding: '1rem', fontWeight: '600', borderStyle: 'dashed' }}>
+                            <button onClick={() => { playSound('click'); setCurriculumModule(subject); }} className="btn btn-outline" style={{ marginTop: '1rem', width: '100%', borderRadius: '16px', padding: '1rem', fontWeight: '700', borderStyle: 'dashed' }}>
                                 <FileText size={18} style={{ marginRight: '8px' }} /> EXPLORE FULL CURRICULUM
                             </button>
                         </div>
@@ -1102,10 +1215,93 @@ const Dashboard = () => {
                     playSound={playSound}
                 />
             )}
+            {isEditingSchedule && (
+                <div className="modal-overlay animate-fade-in" style={{ zIndex: 9999, background: 'rgba(2, 6, 23, 0.85)', backdropFilter: 'blur(12px)' }}>
+                    <div className="card glass-card animate-modal-slide-up" style={{ width: '90%', maxWidth: '500px', padding: '2.5rem', position: 'relative', background: '#0f172a', border: '1px solid var(--glass-border)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)' }}>
+                        <button onClick={() => { playSound('click'); setIsEditingSchedule(false); }} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94a3b8', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="hover-scale"><X size={20} /></button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                            <div style={{ padding: '0.75rem', background: 'rgba(129, 140, 248,0.1)', borderRadius: '16px' }}><Edit size={24} color="var(--primary-color)" /></div>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: '800' }}>Edit Schedule</h2>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Subject / Task</label>
+                                <input
+                                    value={tempScheduleItem.task}
+                                    onChange={(e) => setTempScheduleItem({ ...tempScheduleItem, task: e.target.value })}
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: 'white', outline: 'none', fontSize: '1rem' }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Time Slot</label>
+                                    <input
+                                        value={tempScheduleItem.time}
+                                        onChange={(e) => setTempScheduleItem({ ...tempScheduleItem, time: e.target.value })}
+                                        placeholder="e.g. 09:00 AM"
+                                        style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: 'white', outline: 'none', fontSize: '1rem' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Priority</label>
+                                    <select
+                                        value={tempScheduleItem.priority}
+                                        onChange={(e) => setTempScheduleItem({ ...tempScheduleItem, priority: e.target.value })}
+                                        style={{ width: '100%', background: 'rgba(15, 23, 42, 1)', border: '1px solid var(--glass-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: 'white', outline: 'none', fontSize: '1rem', cursor: 'pointer' }}
+                                    >
+                                        <option value="High">High</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Low">Low</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Session Type</label>
+                                    <input
+                                        value={tempScheduleItem.type}
+                                        onChange={(e) => setTempScheduleItem({ ...tempScheduleItem, type: e.target.value })}
+                                        style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: 'white', outline: 'none', fontSize: '1rem' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Status</label>
+                                    <select
+                                        value={tempScheduleItem.status}
+                                        onChange={(e) => setTempScheduleItem({ ...tempScheduleItem, status: e.target.value })}
+                                        style={{ width: '100%', background: 'rgba(15, 23, 42, 1)', border: '1px solid var(--glass-border)', padding: '0.8rem 1rem', borderRadius: '12px', color: 'white', outline: 'none', fontSize: '1rem', cursor: 'pointer' }}
+                                    >
+                                        <option value="Upcoming">Upcoming</option>
+                                        <option value="Ready">Ready</option>
+                                        <option value="Paused">Paused</option>
+                                        <option value="Syncing">Syncing</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {scheduleError && (
+                                <p style={{ color: 'var(--danger-color)', fontSize: '0.85rem', fontWeight: '700', marginTop: '0.5rem', background: 'rgba(248, 113, 113, 0.1)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(248, 113, 113, 0.2)' }}>{scheduleError}</p>
+                            )}
+
+                            <button
+                                onClick={() => { playSound('click'); handleSaveScheduleEdit(); }}
+                                className="btn btn-primary"
+                                style={{ marginTop: '1.5rem', padding: '1.1rem', borderRadius: '14px', fontWeight: '800', letterSpacing: '0.05em' }}
+                            >
+                                CONFIRM CHANGES
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {curriculumModule && (
-                <div className="modal-overlay animate-fade-in" style={{ zIndex: 2000 }}>
-                    <div className="glass-card" style={{ width: '100%', maxWidth: '600px', padding: '3rem', position: 'relative' }}>
-                        <button onClick={() => { playSound('click'); setCurriculumModule(null); }} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={24} /></button>
+                <div className="modal-overlay animate-fade-in" style={{ zIndex: 9999, background: 'rgba(2, 6, 23, 0.85)', backdropFilter: 'blur(12px)' }}>
+                    <div className="card glass-card animate-modal-slide-up" style={{ width: '90%', maxWidth: '650px', maxHeight: '85vh', padding: '3rem', position: 'relative', display: 'flex', flexDirection: 'column', background: '#0f172a', border: '1px solid var(--glass-border)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)' }}>
+                        <button onClick={() => { playSound('click'); setCurriculumModule(null); }} style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94a3b8', cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }} className="hover-scale"><X size={20} /></button>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                             <div style={{ padding: '1rem', background: 'rgba(129, 140, 248,0.1)', borderRadius: '16px' }}><List size={32} color="#818cf8" /></div>
                             <div>
@@ -1113,14 +1309,14 @@ const Dashboard = () => {
                                 <p style={{ color: '#94a3b8' }}>Topics you'll learn and milestones to hit.</p>
                             </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', paddingRight: '0.5rem' }}>
                             {curriculumModule.videos.map((vid, idx) => (
                                 <a
                                     key={idx}
                                     href={vid.url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="glass"
+                                    className="nav-item glass"
                                     style={{
                                         padding: '1.25rem',
                                         borderRadius: '16px',
@@ -1128,7 +1324,8 @@ const Dashboard = () => {
                                         alignItems: 'center',
                                         gap: '1.25rem',
                                         textDecoration: 'none',
-                                        color: 'white'
+                                        color: 'white',
+                                        background: 'rgba(255,255,255,0.02)'
                                     }}
                                 >
                                     <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>

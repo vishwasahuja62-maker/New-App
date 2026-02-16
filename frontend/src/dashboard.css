@@ -1777,3 +1777,49 @@ body[data-sidebar="right"] .sidebar {
     color: var(--primary-color);
     transition: color 0.3s;
 }
+
+.drag-handle {
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.drag-handle:hover {
+    opacity: 1;
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.schedule-card.is-dragging {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--primary-color);
+}
+
+@keyframes modalSlideUp {
+    from {
+        transform: translateY(30px) scale(0.98);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-modal-slide-up {
+    animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2, 6, 23, 0.82);
+    backdrop-filter: blur(12px);
+}
