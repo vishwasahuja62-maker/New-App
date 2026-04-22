@@ -45,7 +45,7 @@ const InfoPage = () => {
         },
         'discord': {
             title: 'Your Global Study Group',
-            content: 'The journey is easier when you don\'t walk it alone. Our Discord server is a thriving 24/7 campus with over 50,000 active students. Join dedicated channels for your specific subjects, participate in guided "Pomodoro" study sessions with live lo-fi music, or just hang out in the "Break Room" to destress. Our community moderators and expert mentors are always online to help you unstuck specific problems or offer encouragement.',
+            content: 'The journey is easier when you don\'t walk it alone. Our Discord server is a thriving 24/7 campus with over 50,000 active students. Join dedicated channels for your specific subjects, participate in guided "Pomodoro" study sessions with live lo-fi music, or just hang out in the "Break Room" to relax. Our community moderators and expert mentors are always online to help you unstuck specific problems or offer encouragement.',
             icon: Zap
         },
         'linkedin': {

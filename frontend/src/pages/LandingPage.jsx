@@ -84,12 +84,14 @@ const LandingPage = () => {
         setError('');
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (e, isDemo = false) => {
+        if (!isDemo) e.preventDefault();
         setError('');
 
         let result;
-        if (isSignUp) {
+        if (isDemo) {
+            result = await login({ email: 'demo@example.com', password: 'demo123' });
+        } else if (isSignUp) {
             result = await register(formData);
         } else {
             result = await login({ email: formData.email, password: formData.password });
@@ -97,7 +99,7 @@ const LandingPage = () => {
 
         if (result.success) {
             setIsModalOpen(false);
-            if (isSignUp) {
+            if (isSignUp || isDemo) { // Demo users always treated as new to show assessment
                 sessionStorage.setItem('onboardingIsNewUser', 'true');
             } else {
                 sessionStorage.removeItem('onboardingIsNewUser');
@@ -171,7 +173,7 @@ const LandingPage = () => {
                         transition={{ duration: 0.8 }}
                         className="hero-badge"
                     >
-                        <span className="badge-dot"></span> A study buddy that understands you
+                        <span className="badge-dot"></span> A safe space for shy children to bloom
                     </motion.div>
 
                     <motion.h1
@@ -180,8 +182,8 @@ const LandingPage = () => {
                         transition={{ delay: 0.2, duration: 0.8 }}
                         className="hero-headline"
                     >
-                        Learn Fast.<br />
-                        <span className="gradient-text">Stress Less.</span>
+                        Learn Fearlessly.<br />
+                        <span className="gradient-text">Shine Brighter.</span>
                     </motion.h1>
 
                     <motion.p
@@ -190,7 +192,7 @@ const LandingPage = () => {
                         transition={{ delay: 0.4, duration: 0.8 }}
                         className="hero-subtext"
                     >
-                        Most apps treat every student the same. We use AI to learn how <i>you</i> learn, so you can master your subjects without ever feeling burnt out.
+                        Most apps treat every child the same. We provide a safe, quiet space that adapts to your pace, celebrating your unique way of learning without any pressure.
                     </motion.p>
 
                     <motion.div
@@ -247,8 +249,8 @@ const LandingPage = () => {
             {/* Features Grid */}
             < section className="features-section" >
                 <div className="section-header">
-                    <h2>Studying That Feels Natural</h2>
-                    <p>We use tech to keep you focused and happy while you work.</p>
+                    <h2>Learning That Builds Confidence</h2>
+                    <p>We use technology to give you a safe, encouraging space to grow at your own pace.</p>
                 </div>
                 <div className="features-grid">
                     <FeatureCard
@@ -260,13 +262,13 @@ const LandingPage = () => {
                     <FeatureCard
                         icon={Activity}
                         title="Your Perfect Pace"
-                        desc="The app detects when you're tired and slows down, or speeds up when you've mastered a topic."
+                        desc="The app gently adapts to how quickly you pick up topics, letting you learn without rushing."
                         delay={0.3}
                     />
                     <FeatureCard
                         icon={Shield}
-                        title="Stress Support"
-                        desc="If you're feeling overwhelmed, we help you take a break and notify your trusted contact."
+                        title="Gentle Encouragement"
+                        desc="Whenever you need a moment, we provide a quiet, encouraging environment to recharge."
                         delay={0.5}
                     />
                 </div>
@@ -398,6 +400,11 @@ const LandingPage = () => {
                                 {isSignUp ? "Already have an account?" : "New here?"}
                                 <span className="link-premium" style={{ color: '#a78bfa', cursor: 'pointer', marginLeft: '0.5rem' }} onClick={() => setIsSignUp(!isSignUp)}>
                                     {isSignUp ? " Sign In" : " Get Started"}
+                                </span>
+                            </p>
+                            <p className="form-footer-premium" style={{ textAlign: 'center', marginTop: '0.5rem', color: '#64748b' }}>
+                                <span className="link-premium" style={{ color: '#ec4899', cursor: 'pointer', fontSize: '0.9rem' }} onClick={() => handleSubmit({ preventDefault: () => { } }, true)}>
+                                    Or Try Demo Mode
                                 </span>
                             </p>
                         </form>

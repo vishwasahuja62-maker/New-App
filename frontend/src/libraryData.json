@@ -5,12 +5,16 @@
         "title": "Mathematics",
         "videos": [
             {
-                "title": "Calculus for Beginners",
+                "title": "Algebra Fundamentals",
                 "url": "https://www.youtube.com/watch?v=W3WICjSIn98"
             },
             {
-                "title": "Linear Algebra Explained",
+                "title": "Trigonometry Basics",
                 "url": "https://www.youtube.com/watch?v=fNk_zzaMoSs"
+            },
+            {
+                "title": "Calculus: Limits & Continuity",
+                "url": "https://www.youtube.com/watch?v=W3WICjSIn98"
             }
         ]
     },
@@ -20,11 +24,15 @@
         "title": "Physics",
         "videos": [
             {
-                "title": "Quantum Mechanics 101",
+                "title": "Laws of Motion",
+                "url": "https://www.youtube.com/watch?v=pyX8kQ-JzHI"
+            },
+            {
+                "title": "Kinematics & Force",
                 "url": "https://www.youtube.com/watch?v=Usu9xZFABPM"
             },
             {
-                "title": "Classical Mechanics",
+                "title": "Electromagnetic Induction",
                 "url": "https://www.youtube.com/watch?v=pyX8kQ-JzHI"
             }
         ]
@@ -35,12 +43,16 @@
         "title": "Chemistry",
         "videos": [
             {
-                "title": "Organic Chemistry Basics",
+                "title": "Atomic Structure",
                 "url": "https://www.youtube.com/watch?v=G_Pz70V0InI"
             },
             {
-                "title": "Chemical Bonding",
+                "title": "Periodic Table Basics",
                 "url": "https://www.youtube.com/watch?v=B_97i8v61pE"
+            },
+            {
+                "title": "Organic Chemistry: Alkanes",
+                "url": "https://www.youtube.com/watch?v=G_Pz70V0InI"
             }
         ]
     },
@@ -50,27 +62,230 @@
         "title": "Biology",
         "videos": [
             {
-                "title": "Cell Biology Overview",
+                "title": "Cell Biology",
                 "url": "https://www.youtube.com/watch?v=8IlzKri08kk"
             },
             {
-                "title": "Genetics & DNA",
+                "title": "Genetics Basics",
                 "url": "https://www.youtube.com/watch?v=8m6hH8_ID2E"
+            },
+            {
+                "title": "Human Physiology",
+                "url": "https://www.youtube.com/watch?v=8IlzKri08kk"
             }
         ]
     },
     {
         "id": 5,
+        "type": "subject",
+        "title": "Computer Science",
+        "videos": [
+            {
+                "title": "Introduction to Python",
+                "url": "https://www.youtube.com/watch?v=rfscVS0vtbw"
+            },
+            {
+                "title": "Logic Gates Explained",
+                "url": "https://www.youtube.com/watch?v=LgUCyWhJf6s"
+            },
+            {
+                "title": "Data Structures in C++",
+                "url": "https://www.youtube.com/watch?v=rfscVS0vtbw"
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "type": "subject",
+        "title": "Economics",
+        "videos": [
+            {
+                "title": "Microeconomics Concepts",
+                "url": "https://www.youtube.com/watch?v=fH_WCH4QWqU"
+            },
+            {
+                "title": "Macroeconomics Intro",
+                "url": "https://www.youtube.com/watch?v=fH_WCH4QWqU"
+            }
+        ]
+    },
+    {
+        "id": 7,
+        "type": "subject",
+        "title": "Accountancy",
+        "videos": [
+            {
+                "title": "Double Entry System",
+                "url": "https://www.youtube.com/watch?v=yYvS6O2_f6Q"
+            },
+            {
+                "title": "Financial Statements",
+                "url": "https://www.youtube.com/watch?v=yYvS6O2_f6Q"
+            }
+        ]
+    },
+    {
+        "id": 8,
+        "type": "subject",
+        "title": "History",
+        "videos": [
+            {
+                "title": "Ancient Civilizations",
+                "url": "https://www.youtube.com/watch?v=yocw6Z0VfPc"
+            },
+            {
+                "title": "World War I Overview",
+                "url": "https://www.youtube.com/watch?v=yocw6Z0VfPc"
+            }
+        ]
+    },
+    {
+        "id": 9,
+        "type": "subject",
+        "title": "Political Science",
+        "videos": [
+            {
+                "title": "Constitutional Law",
+                "url": "https://www.youtube.com/watch?v=fH_WCH4QWqU"
+            },
+            {
+                "title": "International Relations",
+                "url": "https://www.youtube.com/watch?v=fH_WCH4QWqU"
+            }
+        ]
+    },
+    {
+        "id": 10,
+        "type": "subject",
+        "title": "Psychology",
+        "videos": [
+            {
+                "title": "Cognitive Psychology",
+                "url": "https://www.youtube.com/watch?v=LgUCyWhJf6s"
+            },
+            {
+                "title": "Developmental Stages",
+                "url": "https://www.youtube.com/watch?v=LgUCyWhJf6s"
+            }
+        ]
+    },
+    {
+        "id": 11,
+        "type": "subject",
+        "title": "Anatomy",
+        "videos": [
+            {
+                "title": "The Human Skeletal System",
+                "url": "https://www.youtube.com/watch?v=Usu9xZFABPM"
+            },
+            {
+                "title": "Muscular Coordination",
+                "url": "https://www.youtube.com/watch?v=Usu9xZFABPM"
+            }
+        ]
+    },
+    {
+        "id": 12,
+        "type": "subject",
+        "title": "Data Structures",
+        "videos": [
+            {
+                "title": "Linked Lists & Arrays",
+                "url": "https://www.youtube.com/watch?v=rfscVS0vtbw"
+            },
+            {
+                "title": "Binary Trees Explained",
+                "url": "https://www.youtube.com/watch?v=rfscVS0vtbw"
+            }
+        ]
+    },
+    {
+        "id": 13,
         "type": "topic",
         "title": "Emotional Intelligence",
         "videos": [
             {
-                "title": "Understanding EQ",
+                "title": "Managing Study Stress",
                 "url": "https://www.youtube.com/watch?v=LgUCyWhJf6s"
             },
             {
-                "title": "Managing Stress in Study",
+                "title": "Focus Techniques",
                 "url": "https://www.youtube.com/watch?v=15GaKTP0gu8"
+            }
+        ]
+    },
+    {
+        "id": 14,
+        "type": "subject",
+        "title": "Software Engineering",
+        "videos": [
+            {
+                "title": "SDLC Models",
+                "url": "https://www.youtube.com/watch?v=rfscVS0vtbw"
+            },
+            {
+                "title": "Agile Methodology",
+                "url": "https://www.youtube.com/watch?v=rfscVS0vtbw"
+            }
+        ]
+    },
+    {
+        "id": 15,
+        "type": "subject",
+        "title": "Machine Learning",
+        "videos": [
+            {
+                "title": "Supervised vs Unsupervised",
+                "url": "https://www.youtube.com/watch?v=fH_WCH4QWqU"
+            },
+            {
+                "title": "Neural Networks Basics",
+                "url": "https://www.youtube.com/watch?v=fH_WCH4QWqU"
+            }
+        ]
+    },
+    {
+        "id": 16,
+        "type": "subject",
+        "title": "Digital Electronics",
+        "videos": [
+            {
+                "title": "Number Systems",
+                "url": "https://www.youtube.com/watch?v=LgUCyWhJf6s"
+            },
+            {
+                "title": "Combinational Circuits",
+                "url": "https://www.youtube.com/watch?v=LgUCyWhJf6s"
+            }
+        ]
+    },
+    {
+        "id": 17,
+        "type": "subject",
+        "title": "Computer Networks",
+        "videos": [
+            {
+                "title": "OSI Model Layers",
+                "url": "https://www.youtube.com/watch?v=rfscVS0vtbw"
+            },
+            {
+                "title": "TCP/IP Protocol Suite",
+                "url": "https://www.youtube.com/watch?v=rfscVS0vtbw"
+            }
+        ]
+    },
+    {
+        "id": 18,
+        "type": "subject",
+        "title": "Professional Competence Enhancement-II",
+        "videos": [
+            {
+                "title": "Career Soft Skills",
+                "url": "https://www.youtube.com/watch?v=yYvS6O2_f6Q"
+            },
+            {
+                "title": "Interview Strategies",
+                "url": "https://www.youtube.com/watch?v=yYvS6O2_f6Q"
             }
         ]
     }

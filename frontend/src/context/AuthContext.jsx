@@ -3,7 +3,8 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-const API_URL = 'http://localhost:5000/api/users';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+const API_URL = `${BASE_URL}/api/users`;
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -15,11 +16,12 @@ export const AuthProvider = ({ children }) => {
   const [userProfile, setUserProfile] = useState({
     iq: 0,
     eq: 0,
-    stressLevel: 'normal',
+    fatigueLevel: 'normal',
     lifestyle: {},
     difficultSubjects: [],
     learningMode: 'visual',
     parentContact: '',
+    academicData: { level: '', stream: '', subjects: [] }
   });
 
   const [performanceMetrics, setPerformanceMetrics] = useState({
@@ -48,6 +50,20 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      // DEMO CHECK
+      if (token === 'demo-token-123') {
+        setUser({
+          _id: 'demo-user-id',
+          name: 'Demo Student',
+          email: 'demo@example.com',
+          onboardingStep: 0
+        });
+        setIsAuthenticated(true);
+        setInternalOnboardingStep(0);
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await axios.get(`${API_URL}/profile`);
         if (res.data) {
@@ -58,6 +74,11 @@ export const AuthProvider = ({ children }) => {
           }
         }
       } catch (err) {
+        console.error("Auth check failed:", err);
+        // Don't auto-logout on network error for better UX, maybe? 
+        // No, standard is to logout if token invalid. But here it might be connection refused.
+        // If connection refused, we might want to stay in loading or just fail.
+        // For now, let's just clear if api fails.
         localStorage.removeItem('token');
         setIsAuthenticated(false);
       } finally {
@@ -68,13 +89,24 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Load performance metrics for specific user
+  // Load metrics and profile from localStorage on user change
   useEffect(() => {
     if (user && user._id) {
-      const saved = localStorage.getItem(`metrics_${user._id}`);
-      if (saved) {
+      // Load Profile
+      const savedProfile = localStorage.getItem(`profile_${user._id}`);
+      if (savedProfile) {
         try {
-          setPerformanceMetrics(JSON.parse(saved));
+          setUserProfile(JSON.parse(savedProfile));
+        } catch (e) {
+          console.error("Failed to parse profile", e);
+        }
+      }
+
+      // Load Metrics
+      const savedMetrics = localStorage.getItem(`metrics_${user._id}`);
+      if (savedMetrics) {
+        try {
+          setPerformanceMetrics(JSON.parse(savedMetrics));
         } catch (e) {
           console.error("Failed to parse metrics", e);
         }
@@ -92,6 +124,42 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   const login = async (userData) => {
+    // DEMO LOGIN BYPASS
+    if (userData.email === 'demo@example.com' || userData.password === 'demo123') {
+      const demoUser = {
+        _id: 'demo-user-id',
+        name: 'Demo Student',
+        email: 'demo@example.com',
+        onboardingStep: 0,
+        token: 'demo-token-123'
+      };
+      localStorage.setItem('token', demoUser.token);
+      localStorage.removeItem(`metrics_demo-user-id`);
+      setUser(demoUser);
+      setIsAuthenticated(true);
+      setInternalOnboardingStep(0);
+
+      const demoSubjects = ["Physics", "Chemistry", "Mathematics", "English", "Computer Science"];
+      setUserProfile(prev => ({
+        ...prev,
+        academicData: {
+          level: "Class 12",
+          stream: "PCM (Physics, Chem, Math)",
+          subjects: demoSubjects
+        }
+      }));
+
+      const demoMetrics = {
+        Visual: 85,
+        Auditory: 65,
+        Logic: 90
+      };
+      demoSubjects.forEach(s => { demoMetrics[s] = 75; });
+      updatePerformance(demoMetrics);
+
+      return { success: true, onboardingStep: 0 };
+    }
+
     try {
       const res = await axios.post(`${API_URL}/login`, userData);
       localStorage.setItem('token', res.data.token);
@@ -132,11 +200,12 @@ export const AuthProvider = ({ children }) => {
     setUserProfile({
       iq: 0,
       eq: 0,
-      stressLevel: 'normal',
+      fatigueLevel: 'normal',
       lifestyle: {},
       difficultSubjects: [],
       learningMode: 'visual',
       parentContact: '',
+      academicData: { level: '', stream: '', subjects: [] }
     });
     setPerformanceMetrics({
       Math: 50,
@@ -148,7 +217,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateProfile = (data) => {
-    setUserProfile((prev) => ({ ...prev, ...data }));
+    setUserProfile((prev) => {
+      const newProfile = { ...prev, ...data };
+      if (user && user._id) {
+        localStorage.setItem(`profile_${user._id}`, JSON.stringify(newProfile));
+      }
+      return newProfile;
+    });
   };
 
   const updatePerformance = (metrics) => {
@@ -164,6 +239,7 @@ export const AuthProvider = ({ children }) => {
   const setOnboardingStep = async (step, persist = false) => {
     setInternalOnboardingStep(step);
     if (persist && isAuthenticated) {
+      if (user?._id === 'demo-user-id') return; // Skip API for demo
       try {
         await axios.put(`${API_URL}/onboarding-step`, { onboardingStep: step });
         setUser(prev => prev ? ({ ...prev, onboardingStep: step }) : prev);
@@ -182,38 +258,29 @@ export const AuthProvider = ({ children }) => {
     let logic = 50;
     let visual = 50;
     let auditory = 50;
-    let physics = 50;
 
-    // Math Calculation
+    // Phase 1 (p1) guards
     if (p1[7] === "17") math += 25;
-    if (p2[2] && p2[2].includes("practice problems")) math += 15;
-    if (p2[1] && p2[1].includes("Mathematics")) math -= 15;
-
-    // Logic Calculation
     if (p1[8] === "Page") logic += 15;
     if (p1[9] === "No") logic += 20;
-
-    // Visual Calculation
     if (p1[10] === "Circle") visual += 20;
-    if (p2[2] && p2[2].includes("Watching diagrams")) visual += 25;
 
-    // Auditory Calculation
-    if (p2[2] && p2[2].includes("Listening")) auditory += 30;
-
-    // Physics Calculation (Derived + Interest)
-    physics = (math + logic) / 2;
-    if (p2[1] && p2[1].includes("Physics")) physics -= 15;
+    // Phase 2 (p2) guards
+    if (p2 && p2["lifestyle_2"] && p2["lifestyle_2"].includes("Daily")) visual += 10;
 
     // Clamp values 0-100
     const clamp = (num) => Math.min(100, Math.max(10, num));
 
-    const metrics = {
-      Math: clamp(math),
-      Physics: clamp(physics),
-      Visual: clamp(visual),
-      Auditory: clamp(auditory),
-      Logic: clamp(logic)
-    };
+    const metrics = {};
+    const academicSubjs = userProfile.academicData?.subjects || ["Mathematics", "Physics"];
+
+    academicSubjs.forEach(s => {
+      metrics[s] = 50;
+    });
+
+    metrics['Visual'] = clamp(visual);
+    metrics['Auditory'] = clamp(auditory);
+    metrics['Logic'] = clamp(logic);
 
     updatePerformance(metrics);
     await setOnboardingStep(4, true);
